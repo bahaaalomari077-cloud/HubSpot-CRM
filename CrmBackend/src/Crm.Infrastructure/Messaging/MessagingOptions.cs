@@ -12,6 +12,12 @@ public class SmtpOptions
     public string Password { get; set; } = string.Empty;
     public string FromName { get; set; } = "CRM";
     public string FromAddress { get; set; } = "no-reply@example.com";
+
+    /// <summary>How long one connect/auth/send attempt may take before it is abandoned.</summary>
+    public int AttemptTimeoutSeconds { get; set; } = 15;
+
+    /// <summary>How many times to retry a stalled connection before giving up.</summary>
+    public int MaxAttempts { get; set; } = 8;
 }
 
 /// <summary>WhatsApp Cloud API settings, bound from "Messaging:WhatsApp".</summary>

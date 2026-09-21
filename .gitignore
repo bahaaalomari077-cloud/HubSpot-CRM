@@ -1,1 +1,30 @@
+# ---------- tooling ----------
 /.playwright-mcp
+# screenshots dropped at the repo root by test runs (not app assets)
+/*.png
+
+# ---------- .NET build output ----------
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+
+# ---------- Node / Angular ----------
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# ---------- secrets & local data ----------
+secrets.json
+*.env
+.env.*
+
+# ---------- local backups ----------
+db-backup-*.sql
+backup-before-*.json
+
+# ---------- OS ----------
+Thumbs.db
+.DS_Store
