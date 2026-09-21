@@ -56,15 +56,31 @@ public class ApplicationsController : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
-    /// <summary>Move an application to a new pipeline stage (kanban drag).</summary>
+    /// <summary>
+    /// Move an application to a new pipeline stage (kanban drag).
+    /// Rejects illegal transitions: skipping stages, moving backward
+    /// (unless <c>allowBackward</c> is set), or leaving a closed stage.
+    /// </summary>
     [HttpPatch("{id:guid}/stage")]
     [ProducesResponseType(typeof(ApplicationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<ApplicationDto>> MoveStage(
         Guid id, [FromBody] MoveStageDto dto, CancellationToken ct)
     {
-        var moved = await _service.MoveStageAsync(id, dto, ct);
-        return moved is null ? NotFound() : Ok(moved);
+        var result = await _service.MoveStageAsync(id, dto, ct);
+
+        if (!result.Found) return NotFound();
+
+        if (!result.Allowed)
+            return UnprocessableEntity(new ProblemDetails
+            {
+                Title = "Invalid stage transition",
+                Detail = result.Error,
+                Status = StatusCodes.Status422UnprocessableEntity
+            });
+
+        return Ok(result.Application);
     }
 
     /// <summary>Soft-delete an application.</summary>

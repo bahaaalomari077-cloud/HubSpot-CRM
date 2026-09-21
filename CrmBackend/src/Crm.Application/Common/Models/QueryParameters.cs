@@ -32,6 +32,9 @@ public class ContactQueryParameters : QueryParameters
 {
     public Guid? CompanyId { get; set; }
     public Guid? AssignedToId { get; set; }
+
+    /// <summary>0 potential · 1 contacted · 2 interested · 3 applied · 4 client · 5 rejected</summary>
+    public int? Status { get; set; }
 }
 
 public class ApplicationQueryParameters : QueryParameters
@@ -44,6 +47,9 @@ public class ApplicationQueryParameters : QueryParameters
     public decimal? MinAmount { get; set; }
     public decimal? MaxAmount { get; set; }
 }
+
+/// <summary>Companies only need paging + search, so no extra filters.</summary>
+public class CompanyQueryParameters : QueryParameters { }
 
 public class ActivityQueryParameters : QueryParameters
 {

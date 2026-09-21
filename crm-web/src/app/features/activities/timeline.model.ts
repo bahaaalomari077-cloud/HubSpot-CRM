@@ -7,7 +7,7 @@ export interface TimelineItem {
   title: string;
   detail?: string | null;
   /** Sub-type for icon selection: Call, Meeting, Email, WhatsApp, Sms, … */
-  tag: string;
+  subType: string;
   direction?: string | null;   // messages: Inbound / Outbound
   isCompleted?: boolean | null; // activities
 }

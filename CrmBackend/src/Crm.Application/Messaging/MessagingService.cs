@@ -73,11 +73,19 @@ public class MessagingService : IMessagingService
             message.Status = MessageStatus.Sent;
             message.ProviderMessageId = result.ProviderMessageId;
             message.FailureReason = null;
+
+            _log.LogInformation(
+                "Message sent {MessageId} channel={Channel} contact={ContactId} provider={ProviderMessageId}",
+                message.Id, message.Channel, message.ContactId, message.ProviderMessageId);
         }
         else
         {
             message.Status = MessageStatus.Failed;
             message.FailureReason = result.FailureReason;
+
+            _log.LogWarning(
+                "Message failed {MessageId} channel={Channel} contact={ContactId} reason={Reason}",
+                message.Id, message.Channel, message.ContactId, message.FailureReason);
         }
         await _db.SaveChangesAsync(ct);
 

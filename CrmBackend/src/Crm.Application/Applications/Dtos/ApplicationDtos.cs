@@ -50,4 +50,23 @@ public class UpdateApplicationDto
 public class MoveStageDto
 {
     public ApplicationStage Stage { get; set; }
+
+    /// <summary>
+    /// Allow moving to an earlier stage (a correction). Off by default so the
+    /// pipeline only advances.
+    /// </summary>
+    public bool AllowBackward { get; set; }
+}
+
+/// <summary>Outcome of a stage move, distinguishing "not found" from "rejected".</summary>
+public class MoveStageResult
+{
+    public bool Found { get; init; }
+    public bool Allowed { get; init; }
+    public string? Error { get; init; }
+    public ApplicationDto? Application { get; init; }
+
+    public static MoveStageResult NotFound() => new() { Found = false, Allowed = false };
+    public static MoveStageResult Rejected(string error) => new() { Found = true, Allowed = false, Error = error };
+    public static MoveStageResult Ok(ApplicationDto app) => new() { Found = true, Allowed = true, Application = app };
 }

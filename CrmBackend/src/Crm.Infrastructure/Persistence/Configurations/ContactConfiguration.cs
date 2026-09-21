@@ -16,6 +16,8 @@ public class ContactConfiguration : IEntityTypeConfiguration<Contact>
         b.Property(c => c.Email).HasMaxLength(256);
         b.Property(c => c.Phone).HasMaxLength(40);
         b.Property(c => c.Position).HasMaxLength(160);
+        b.Property(c => c.Status).HasConversion<int>();
+        b.Property(c => c.NextAction).HasMaxLength(300);
         b.Ignore(c => c.FullName);
 
         // Contact → Company (many contacts to one company). Nullable FK,
@@ -31,6 +33,10 @@ public class ContactConfiguration : IEntityTypeConfiguration<Contact>
             .HasForeignKey(c => c.AssignedToId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        b.HasIndex(c => c.Status);   // the admin filters the contact list by status
+
+        // Dashboard's "upcoming actions" list: WHERE NextActionDate IS NOT NULL ORDER BY it.
+        b.HasIndex(c => c.NextActionDate);
         b.HasIndex(c => c.CompanyId);
         b.HasIndex(c => c.AssignedToId);
         b.HasIndex(c => c.Email);

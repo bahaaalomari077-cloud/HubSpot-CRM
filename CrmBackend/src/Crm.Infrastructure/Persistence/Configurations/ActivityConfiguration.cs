@@ -33,7 +33,11 @@ public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
 
         // Powers the "overdue" and "due today" counters.
         b.HasIndex(a => new { a.AssignedToId, a.Deadline, a.IsCompleted });
-        b.HasIndex(a => a.ContactId);
+
+        // Timeline query: filter by ContactId, sort by CreatedAt DESC, Take(50).
+        // The composite lets Postgres satisfy the WHERE *and* the ORDER BY from one
+        // index scan — no sort step, and it stops after 50 rows.
+        b.HasIndex(a => new { a.ContactId, a.CreatedAt });
         b.HasIndex(a => a.ApplicationId);
 
         b.HasQueryFilter(a => !a.IsDeleted);

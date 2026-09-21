@@ -4,14 +4,20 @@ using Crm.Application.Common.Models;
 using Crm.Domain.Entities;
 using Crm.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Crm.Application.Activities;
 
 public class ActivityService : IActivityService
 {
     private readonly ICrmDbContext _db;
+    private readonly ILogger<ActivityService> _log;
 
-    public ActivityService(ICrmDbContext db) => _db = db;
+    public ActivityService(ICrmDbContext db, ILogger<ActivityService> log)
+    {
+        _db = db;
+        _log = log;
+    }
 
     public async Task<PagedResult<ActivityDto>> GetPagedAsync(ActivityQueryParameters query, CancellationToken ct = default)
     {
@@ -90,6 +96,10 @@ public class ActivityService : IActivityService
 
         _db.Activities.Add(activity);
         await _db.SaveChangesAsync(ct);
+
+        _log.LogInformation("Activity logged {ActivityId} type={Type} contact={ContactId}",
+            activity.Id, activity.Type, activity.ContactId);
+
         return Map(activity);
     }
 

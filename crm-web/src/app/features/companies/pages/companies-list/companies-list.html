@@ -1,0 +1,74 @@
+<div class="page">
+  <header class="page-head">
+    <h1>Companies</h1>
+    <div class="tools">
+      <input type="search" placeholder="Search name, industry, city…"
+             [(ngModel)]="search" (keyup.enter)="onSearch()" />
+      <button class="btn" (click)="onSearch()">Search</button>
+      <button class="btn primary" (click)="openCreate()">+ New company</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Loading…</p>
+  } @else if (error()) {
+    <p class="state error">{{ error() }}</p>
+  } @else if (companies().length === 0) {
+    <div class="state">
+      <p>No companies yet.</p>
+      <button class="btn primary" (click)="openCreate()">+ Add your first company</button>
+    </div>
+  } @else {
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Name</th><th>Industry</th><th>Contacts</th>
+          <th>City</th><th>Email</th><th>Phone</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of companies(); track c.id) {
+          <tr [class.active-row]="(c.activeContacts ?? 0) > 0">
+            <td>
+              <a class="name" [routerLink]="['/companies', c.id]">{{ c.name }}</a>
+              @if (c.website) { <a class="site" [href]="'https://' + c.website" target="_blank" rel="noopener">↗</a> }
+            </td>
+            <td>{{ c.industry || '—' }}</td>
+            <td>
+              @if ((c.contactCount ?? 0) > 0) {
+                <a class="count-link" [routerLink]="['/contacts']" [queryParams]="{ companyId: c.id }">
+                  {{ c.contactCount }}
+                </a>
+                @if ((c.activeContacts ?? 0) > 0) {
+                  <span class="active-dot" [title]="c.activeContacts + ' active'">{{ c.activeContacts }} active</span>
+                }
+              } @else { <span class="dash">0</span> }
+            </td>
+            <td>{{ c.addressCity || '—' }}</td>
+            <td>{{ c.email || '—' }}</td>
+            <td>{{ c.phone || '—' }}</td>
+            <td class="row-actions">
+              <button class="link" (click)="openEdit(c)">Edit</button>
+              <button class="link danger" (click)="remove(c)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer class="pager">
+      <span>{{ totalCount() }} companies · page {{ page() }} / {{ totalPages() }}</span>
+      <div class="pager-btns">
+        <button class="btn" [disabled]="page() === 1" (click)="prev()">Prev</button>
+        <button class="btn" [disabled]="page() >= totalPages()" (click)="next()">Next</button>
+      </div>
+    </footer>
+  }
+
+  <app-company-form
+    [mode]="formMode()"
+    [busy]="formBusy()"
+    [error]="formError()"
+    (saved)="saveForm($event)"
+    (closed)="closeForm()" />
+</div>

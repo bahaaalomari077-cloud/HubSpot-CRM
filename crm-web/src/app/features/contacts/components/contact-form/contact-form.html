@@ -1,0 +1,71 @@
+@if (mode()) {
+  <div class="backdrop" (click)="close()">
+    <div class="modal" (click)="$event.stopPropagation()" role="dialog">
+      <header class="modal-head">
+        <h3>{{ isEdit ? 'Edit contact' : 'New contact' }}</h3>
+        <button class="x" type="button" (click)="close()" aria-label="Close">×</button>
+      </header>
+
+      <div class="modal-body">
+        <div class="row">
+          <label>
+            <span>First name *</span>
+            <input type="text" [(ngModel)]="firstName" name="firstName"
+                   (keyup.enter)="submit()" />
+          </label>
+          <label>
+            <span>Last name *</span>
+            <input type="text" [(ngModel)]="lastName" name="lastName"
+                   (keyup.enter)="submit()" />
+          </label>
+        </div>
+
+        <div class="row">
+          <label>
+            <span>Email</span>
+            <input type="email" [(ngModel)]="email" name="email" />
+          </label>
+          <label>
+            <span>Phone</span>
+            <input type="text" [(ngModel)]="phone" name="phone" placeholder="962791234567" />
+          </label>
+        </div>
+
+        <label>
+          <span>Position</span>
+          <input type="text" [(ngModel)]="position" name="position" />
+        </label>
+
+        <div class="row">
+          <label>
+            <span>Status</span>
+            <select [(ngModel)]="status" name="status">
+              @for (s of statuses; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Company</span>
+            <select [(ngModel)]="companyId" name="companyId">
+              <option value="">— none —</option>
+              @for (c of companies(); track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        @if (error()) { <p class="err">{{ error() }}</p> }
+      </div>
+
+      <footer class="modal-foot">
+        <button class="btn" type="button" (click)="close()">Cancel</button>
+        <button class="btn primary" type="button"
+                [disabled]="invalid || busy()" (click)="submit()">
+          {{ busy() ? 'Saving…' : (isEdit ? 'Save changes' : 'Create contact') }}
+        </button>
+      </footer>
+    </div>
+  </div>
+}

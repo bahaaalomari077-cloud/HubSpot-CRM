@@ -126,20 +126,27 @@ public class ApplicationService : IApplicationService
     /// Kanban stage move. Reproduces the live-verified Bitrix24 behavior:
     /// semantic recomputes, IsClosed flips, and CloseDate resets to now on a win/loss.
     /// </summary>
-    public async Task<ApplicationDto?> MoveStageAsync(Guid id, MoveStageDto dto, CancellationToken ct = default)
+    public async Task<MoveStageResult> MoveStageAsync(Guid id, MoveStageDto dto, CancellationToken ct = default)
     {
         var app = await _db.Applications.FirstOrDefaultAsync(a => a.Id == id, ct);
-        if (app is null) return null;
+        if (app is null) return MoveStageResult.NotFound();
 
+        // --- transition validation: no skipping, no backward (unless opted in),
+        //     and a closed deal cannot leave its terminal stage.
+        var error = StageTransition.Validate(app.Stage, dto.Stage, dto.AllowBackward);
+        if (error is not null) return MoveStageResult.Rejected(error);
+
+        app.PreviousStageId = app.Stage;
         app.Stage = dto.Stage;
         app.StageSemantic = SemanticFor(dto.Stage);
         app.IsClosed = IsTerminal(dto.Stage);
         if (app.IsClosed)
             app.CloseDate = DateTimeOffset.UtcNow;
+        app.MovedAt = DateTimeOffset.UtcNow;
         app.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync(ct);
-        return Map(app);
+        return MoveStageResult.Ok(Map(app));
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)

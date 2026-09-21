@@ -1,5 +1,5 @@
 import {
-  ApplicationStage, StageSemantic,
+  ApplicationStage, StageSemantic, ContactStatus,
   ActivityType, ActivityStatus,
   MessageChannel, MessageDirection
 } from './common.model';
@@ -12,6 +12,9 @@ export interface Contact {
   email?: string | null;
   phone?: string | null;
   position?: string | null;
+  status: ContactStatus;
+  nextAction?: string | null;
+  nextActionDate?: string | null;
   companyId?: string | null;
   companyName?: string | null;
   assignedToId?: string | null;
@@ -25,6 +28,8 @@ export interface CreateContact {
   email?: string | null;
   phone?: string | null;
   position?: string | null;
+  /** Defaults to Potential on the server when omitted. */
+  status?: ContactStatus;
   companyId?: string | null;
   assignedToId?: string | null;
 }
@@ -40,6 +45,8 @@ export interface Company {
   addressCountry?: string | null;
   annualRevenue?: number | null;
   employeeCount?: number | null;
+  contactCount?: number;
+  activeContacts?: number;
   assignedToId?: string | null;
   createdAt: string;
 }

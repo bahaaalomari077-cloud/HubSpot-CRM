@@ -5,28 +5,75 @@
     <p class="state">Loading…</p>
   } @else if (error()) {
     <p class="state error">{{ error() }}</p>
-  } @else {
-    <div class="tiles">
-      <a class="tile" routerLink="/contacts">
-        <span class="k">Contacts</span>
-        <span class="v">{{ contactCount() }}</span>
-      </a>
-      <a class="tile" routerLink="/applications">
-        <span class="k">Companies</span>
-        <span class="v">{{ companyCount() }}</span>
-      </a>
-      <a class="tile" routerLink="/applications">
-        <span class="k">Open applications</span>
-        <span class="v">{{ openCount() }}</span>
-      </a>
-      <div class="tile accent">
-        <span class="k">Pipeline value</span>
-        <span class="v">{{ pipelineValue() | currency:'USD':'symbol':'1.0-0' }}</span>
+  } @else if (data(); as d) {
+
+    <!-- ---------- contacts grouped by status ---------- -->
+    <section class="block">
+      <h2>Pipeline <span class="sub">{{ d.totalContacts }} contacts</span></h2>
+      <div class="status-row">
+        @for (g of d.contactsByStatus; track g.status) {
+          <a class="status-card"
+             [routerLink]="['/contacts']"
+             [queryParams]="{ status: statusIndex(g.status) }"
+             [style.--sc-color]="statusColor(g.status)">
+            <span class="sc-count">{{ g.count }}</span>
+            <span class="sc-label">{{ g.status }}</span>
+          </a>
+        }
       </div>
-      <div class="tile success">
-        <span class="k">Won</span>
-        <span class="v">{{ wonCount() }}</span>
-      </div>
+    </section>
+
+    <div class="cols">
+      <!-- ---------- upcoming actions ---------- -->
+      <section class="block card">
+        <h2>
+          What's next
+          @if (d.overdueCount > 0) {
+            <span class="badge-overdue">{{ d.overdueCount }} overdue</span>
+          }
+        </h2>
+
+        @if (d.upcomingActions.length === 0) {
+          <p class="empty">No next actions set. Open a contact to add one.</p>
+        } @else {
+          <ul class="actions">
+            @for (a of d.upcomingActions; track a.contactId) {
+              <li class="action" [class.overdue]="a.isOverdue">
+                <span class="dot" [style.background]="statusColor(a.status)"></span>
+                <div class="a-body">
+                  <a class="a-name" [routerLink]="['/contacts', a.contactId]">{{ a.contactName }}</a>
+                  <p class="a-text">{{ a.nextAction }}</p>
+                </div>
+                <span class="a-due" [class.overdue]="a.isOverdue">{{ dueLabel(a) }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <!-- ---------- recent activity ---------- -->
+      <section class="block card">
+        <h2>Recent activity</h2>
+
+        @if (d.recentItems.length === 0) {
+          <p class="empty">Nothing logged yet.</p>
+        } @else {
+          <ul class="recent">
+            @for (r of d.recentItems; track r.id) {
+              <li class="r-item">
+                <span class="r-ic">{{ icon(r.subType) }}</span>
+                <div class="r-body">
+                  <span class="r-title">{{ r.title }}</span>
+                  @if (r.contactName) {
+                    <a class="r-contact" [routerLink]="['/contacts', r.contactId]">{{ r.contactName }}</a>
+                  }
+                </div>
+                <time class="r-time">{{ r.occurredAt | date:'MMM d, h:mm a' }}</time>
+              </li>
+            }
+          </ul>
+        }
+      </section>
     </div>
   }
 </div>

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using Crm.Application.Common.Validation;
 using Crm.Domain.Enums;
 
 namespace Crm.Application.Activities.Dtos;
@@ -25,13 +27,18 @@ public class ActivityDto
 public class CreateActivityDto
 {
     /// <summary>note | call | meeting (or the other ActivityType values).</summary>
+    [EnumDataType(typeof(ActivityType), ErrorMessage = "Unknown activity type.")]
     public ActivityType Type { get; set; } = ActivityType.Note;
 
     /// <summary>Short title. If omitted, it's derived from the type.</summary>
+    [StringLength(256)]
     public string? Subject { get; set; }
 
+    [StringLength(4000)]
     public string? Description { get; set; }
 
+    // Guid is a value type, so [Required] never fires — check for Guid.Empty instead.
+    [NotEmptyGuid(ErrorMessage = "ContactId is required.")]
     public Guid ContactId { get; set; }
     public Guid? ApplicationId { get; set; }   // optional
     public Guid? AssignedToId { get; set; }

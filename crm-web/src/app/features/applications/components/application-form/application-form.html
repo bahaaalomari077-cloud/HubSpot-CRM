@@ -1,0 +1,58 @@
+@if (mode()) {
+  <div class="backdrop" (click)="close()">
+    <div class="modal" (click)="$event.stopPropagation()" role="dialog">
+      <header class="modal-head">
+        <h3>{{ isEdit ? 'Edit application' : 'New application' }}</h3>
+        <button class="x" type="button" (click)="close()" aria-label="Close">×</button>
+      </header>
+
+      <div class="modal-body">
+        <label>
+          <span>Title *</span>
+          <input type="text" [(ngModel)]="title" name="title" (keyup.enter)="submit()" />
+        </label>
+
+        <div class="row">
+          <label>
+            <span>Amount</span>
+            <input type="number" min="0" step="100" [(ngModel)]="amount" name="amount" />
+          </label>
+          <label>
+            <span>Currency</span>
+            <select [(ngModel)]="currencyCode" name="currency">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="JOD">JOD</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row">
+          <label>
+            <span>Probability (%)</span>
+            <input type="number" min="0" max="100" step="5" [(ngModel)]="probability" name="prob" />
+          </label>
+          <label>
+            <span>Contact</span>
+            <select [(ngModel)]="contactId" name="contactId">
+              <option value="">— none —</option>
+              @for (c of contacts(); track c.id) {
+                <option [value]="c.id">{{ c.fullName }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        @if (error()) { <p class="err">{{ error() }}</p> }
+      </div>
+
+      <footer class="modal-foot">
+        <button class="btn" type="button" (click)="close()">Cancel</button>
+        <button class="btn primary" type="button"
+                [disabled]="invalid || busy()" (click)="submit()">
+          {{ busy() ? 'Saving…' : (isEdit ? 'Save changes' : 'Create') }}
+        </button>
+      </footer>
+    </div>
+  </div>
+}

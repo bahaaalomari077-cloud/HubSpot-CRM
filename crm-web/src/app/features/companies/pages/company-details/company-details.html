@@ -1,0 +1,91 @@
+<div class="page">
+  <a class="back" routerLink="/companies">← Back to companies</a>
+
+  @if (loading()) {
+    <p class="state">Loading…</p>
+  } @else if (error()) {
+    <p class="state error">{{ error() }}</p>
+  } @else if (data(); as d) {
+
+    <!-- ---------- header ---------- -->
+    <header class="head" [class.active]="d.isActive">
+      <div class="head-main">
+        <h1>
+          {{ d.company.name }}
+          @if (d.isActive) { <span class="active-badge">Active</span> }
+        </h1>
+        <p class="meta">
+          @if (d.company.industry) { <span>{{ d.company.industry }}</span> }
+          @if (d.company.addressCity) { <span>{{ d.company.addressCity }}</span> }
+          @if (d.company.employeeCount) { <span>{{ d.company.employeeCount }} employees</span> }
+        </p>
+      </div>
+      <div class="head-contact">
+        @if (d.company.email) { <span>{{ d.company.email }}</span> }
+        @if (d.company.phone) { <span>{{ d.company.phone }}</span> }
+        @if (d.company.website) {
+          <a [href]="'https://' + d.company.website" target="_blank" rel="noopener">{{ d.company.website }} ↗</a>
+        }
+      </div>
+    </header>
+
+    <!-- ---------- insights ---------- -->
+    <section class="insights">
+      <div class="tile">
+        <span class="t-count">{{ d.company.contactCount ?? 0 }}</span>
+        <span class="t-label">Total contacts</span>
+      </div>
+      <div class="tile" [class.hot]="d.activeContacts > 0">
+        <span class="t-count">{{ d.activeContacts }}</span>
+        <span class="t-label">Active</span>
+      </div>
+
+      @if (d.contactsByStatus.length > 0) {
+        <div class="breakdown">
+          <span class="b-label">By status</span>
+          <div class="bars">
+            @for (g of d.contactsByStatus; track g.status) {
+              <span class="bar" [style.background]="statusColor(g.status)">
+                {{ g.status }} {{ g.count }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- ---------- contacts ---------- -->
+    <section class="contacts">
+      <h2>Contacts</h2>
+
+      @if (d.contacts.length === 0) {
+        <p class="empty">No contacts linked to this company yet.</p>
+      } @else {
+        <table class="grid">
+          <thead>
+            <tr><th>Name</th><th>Status</th><th>Position</th><th>Next action</th><th>Email</th><th>Phone</th></tr>
+          </thead>
+          <tbody>
+            @for (c of d.contacts; track c.id) {
+              <tr [class]="'row-' + c.status.toLowerCase()">
+                <td><a [routerLink]="['/contacts', c.id]">{{ c.fullName }}</a></td>
+                <td><span class="pill" [class]="'pill ' + c.status.toLowerCase()">{{ c.status }}</span></td>
+                <td>{{ c.position || '—' }}</td>
+                <td class="na-cell">
+                  @if (c.nextAction) {
+                    <span class="na-txt">{{ c.nextAction }}</span>
+                    @if (c.nextActionDate) {
+                      <span class="na-tag" [class.overdue]="isOverdue(c)">{{ dueLabel(c) }}</span>
+                    }
+                  } @else { <span class="dash">—</span> }
+                </td>
+                <td>{{ c.email || '—' }}</td>
+                <td>{{ c.phone || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+</div>

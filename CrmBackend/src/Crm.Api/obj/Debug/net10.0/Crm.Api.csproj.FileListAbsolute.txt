@@ -132,3 +132,4 @@ C:\Users\MSI1\Downloads\HubSpot CRM\CrmBackend\src\Crm.Api\obj\Debug\net10.0\ref
 C:\Users\MSI1\Downloads\HubSpot CRM\CrmBackend\src\Crm.Api\bin\Debug\net10.0\BouncyCastle.Cryptography.dll
 C:\Users\MSI1\Downloads\HubSpot CRM\CrmBackend\src\Crm.Api\bin\Debug\net10.0\MailKit.dll
 C:\Users\MSI1\Downloads\HubSpot CRM\CrmBackend\src\Crm.Api\bin\Debug\net10.0\MimeKit.dll
+C:\Users\MSI1\Downloads\HubSpot CRM\CrmBackend\src\Crm.Api\obj\Debug\net10.0\Crm.Api.sourcelink.json

@@ -16,6 +16,12 @@ public class Application : BaseEntity
     public StageSemantic StageSemantic { get; set; } = StageSemantic.Process;
     public bool IsClosed { get; set; }
 
+    /// <summary>Stage the deal came from on its last move — enough to trace a step back.</summary>
+    public ApplicationStage? PreviousStageId { get; set; }
+
+    /// <summary>When the stage last changed.</summary>
+    public DateTimeOffset? MovedAt { get; set; }
+
     public decimal Amount { get; set; }
     public string CurrencyCode { get; set; } = "USD";
     public int Probability { get; set; }

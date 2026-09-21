@@ -8,19 +8,27 @@
       </select>
       <input type="number" placeholder="Min amount" [(ngModel)]="minAmount" (keyup.enter)="load()" />
       <button class="btn" (click)="load()">Apply</button>
+      <button class="btn primary" (click)="openCreate()">+ New application</button>
     </div>
   </header>
+
+  @if (stageError()) {
+    <p class="stage-error">⚠ {{ stageError() }}</p>
+  }
 
   @if (loading()) {
     <p class="state">Loading…</p>
   } @else if (error()) {
     <p class="state error">{{ error() }}</p>
   } @else if (items().length === 0) {
-    <p class="state">No applications match.</p>
+    <div class="state">
+      <p>No applications yet.</p>
+      <button class="btn primary" (click)="openCreate()">+ Add your first application</button>
+    </div>
   } @else {
     <table class="grid">
       <thead>
-        <tr><th>Title</th><th>Stage</th><th>Amount</th><th>Contact</th><th>Company</th></tr>
+        <tr><th>Title</th><th>Stage</th><th>Amount</th><th>Contact</th><th>Move to</th><th></th></tr>
       </thead>
       <tbody>
         @for (a of items(); track a.id) {
@@ -29,11 +37,32 @@
             <td><span class="pill" [class]="semanticClass(a)">{{ a.stage }}</span></td>
             <td class="num">{{ a.amount | currency:a.currencyCode }}</td>
             <td>{{ a.contactName || '—' }}</td>
-            <td>{{ a.companyName || '—' }}</td>
+            <td>
+              <select class="stage-select" [ngModel]="a.stage"
+                      (ngModelChange)="moveStage(a, $event)"
+                      [disabled]="a.isClosed">
+                @for (s of stages; track s.value) {
+                  @if (s.name) {
+                    <option [value]="s.name">{{ s.label }}</option>
+                  }
+                }
+              </select>
+            </td>
+            <td class="row-actions">
+              <button class="link" (click)="openEdit(a)">Edit</button>
+              <button class="link danger" (click)="remove(a)">Delete</button>
+            </td>
           </tr>
         }
       </tbody>
     </table>
     <p class="count">{{ totalCount() }} applications</p>
   }
+
+  <app-application-form
+    [mode]="formMode()"
+    [busy]="formBusy()"
+    [error]="formError()"
+    (saved)="saveForm($event)"
+    (closed)="closeForm()" />
 </div>

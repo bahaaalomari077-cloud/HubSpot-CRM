@@ -82,7 +82,7 @@ namespace Crm.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ApplicationId");
 
-                    b.HasIndex("ContactId");
+                    b.HasIndex("ContactId", "CreatedAt");
 
                     b.HasIndex("AssignedToId", "Deadline", "IsCompleted");
 
@@ -133,6 +133,12 @@ namespace Crm.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("MovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("PreviousStageId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Probability")
                         .HasColumnType("integer");
@@ -276,6 +282,13 @@ namespace Crm.Infrastructure.Persistence.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
 
+                    b.Property<string>("NextAction")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<DateTimeOffset?>("NextActionDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Phone")
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
@@ -283,6 +296,9 @@ namespace Crm.Infrastructure.Persistence.Migrations
                     b.Property<string>("Position")
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -297,6 +313,10 @@ namespace Crm.Infrastructure.Persistence.Migrations
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("Email");
+
+                    b.HasIndex("NextActionDate");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("contacts", (string)null);
                 });

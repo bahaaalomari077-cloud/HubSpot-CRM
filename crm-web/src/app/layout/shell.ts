@@ -9,8 +9,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class Shell {
   readonly nav = [
+    { path: '/pipeline', label: 'Pipeline' },
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/contacts', label: 'Contacts' },
+    { path: '/companies', label: 'Companies' },
     { path: '/applications', label: 'Applications' }
   ];
 }

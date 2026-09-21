@@ -1,0 +1,161 @@
+<div class="page">
+  <!-- ---------- header ---------- -->
+  <header class="head">
+    <h1>Pipeline</h1>
+    <span class="count">{{ total() }} contacts</span>
+    <button class="ui-btn ui-btn--ghost" (click)="toggleImport()">
+      {{ importOpen() ? 'Close import' : 'Bulk import' }}
+    </button>
+    <button class="ui-btn ui-btn--ghost" (click)="load()">Refresh</button>
+  </header>
+
+  <!-- ---------- quick add ---------- -->
+  <section class="quick-add">
+    <input class="ui-input qa-name" type="text"
+           placeholder="Company or contact name"
+           [(ngModel)]="qaCompany" name="qaCompany"
+           [disabled]="qaBusy()"
+           (keyup.enter)="quickAdd()" />
+    <input class="ui-input" type="email"
+           placeholder="Email"
+           [(ngModel)]="qaEmail" name="qaEmail"
+           [disabled]="qaBusy()"
+           (keyup.enter)="quickAdd()" />
+    <input class="ui-input" type="text"
+           placeholder="Phone"
+           [(ngModel)]="qaPhone" name="qaPhone"
+           [disabled]="qaBusy()"
+           (keyup.enter)="quickAdd()" />
+    <select class="ui-select" [(ngModel)]="qaStatus" name="qaStatus" [disabled]="qaBusy()"
+            title="Which column this contact goes to">
+      @for (col of columns; track col.key) {
+        <option [value]="col.status">{{ col.label }}</option>
+      }
+    </select>
+    <button class="ui-btn ui-btn--primary"
+            [disabled]="quickAddInvalid || qaBusy()"
+            (click)="quickAdd()">
+      {{ qaBusy() ? 'Adding…' : '+ Add Contact' }}
+    </button>
+  </section>
+
+  @if (importOpen()) {
+    <section class="import-panel">
+      <label class="import-label" for="bulk">
+        Paste one contact per line — <code>Name | email | phone</code>
+      </label>
+      <textarea id="bulk" class="ui-input import-box" rows="5"
+                placeholder="Nexus | info@nexus.com | 0791234567&#10;Omar Tech | omar@mail.com | 0787654321"
+                [(ngModel)]="importText" name="importText"
+                [disabled]="importBusy()"></textarea>
+
+      <div class="import-foot">
+        <label class="import-status">
+          Add to
+          <select class="ui-select" [(ngModel)]="importStatus" name="importStatus"
+                  [disabled]="importBusy()">
+            @for (col of columns; track col.key) {
+              <option [value]="col.status">{{ col.label }}</option>
+            }
+          </select>
+        </label>
+        <span class="import-count">
+          {{ parsedRows.length }} contact{{ parsedRows.length === 1 ? '' : 's' }} detected
+        </span>
+        <button class="ui-btn" (click)="toggleImport()">Cancel</button>
+        <button class="ui-btn ui-btn--primary"
+                [disabled]="parsedRows.length === 0 || importBusy()"
+                (click)="runImport()">
+          {{ importBusy() ? 'Importing…' : 'Import' }}
+        </button>
+      </div>
+
+      @if (importErrors().length > 0) {
+        <ul class="import-errors">
+          @for (e of importErrors(); track e) { <li>{{ e }}</li> }
+        </ul>
+      }
+    </section>
+  }
+
+  @if (loading()) {
+    <p class="state">Loading board…</p>
+  } @else if (error()) {
+    <p class="state state--error">{{ error() }}</p>
+  } @else {
+    <div class="board" cdkDropListGroup>
+      @for (col of columns; track col.key) {
+        <section class="col" [style.--col-color]="col.color">
+
+          <header class="col-head">
+            <span class="col-label">{{ col.label }}</span>
+            <span class="col-count">{{ contactsIn(col.key).length }}</span>
+          </header>
+
+          <div class="col-body"
+               cdkDropList
+               [id]="'list-' + col.key"
+               [cdkDropListData]="contactsIn(col.key)"
+               [cdkDropListConnectedTo]="listIds"
+               (cdkDropListDropped)="drop($event, col)">
+
+            @for (c of contactsIn(col.key); track c.id) {
+              <article class="card" [class.card--overdue]="isOverdue(c)" cdkDrag>
+                <div class="drag-placeholder" *cdkDragPlaceholder></div>
+
+                <div class="card-top">
+                  <span class="avatar" [style.background]="avatarColor(c)">{{ initial(c) }}</span>
+                  <a class="card-name" [routerLink]="['/contacts', c.id]">{{ c.fullName }}</a>
+                </div>
+
+                @if (c.companyName) { <p class="card-company">{{ c.companyName }}</p> }
+                @if (c.phone) { <p class="card-phone">{{ c.phone }}</p> }
+
+                @if (c.nextAction) {
+                  <div class="card-na" [class.card-na--overdue]="isOverdue(c)">
+                    <span class="na-text">{{ c.nextAction }}</span>
+                    @if (c.nextActionDate) {
+                      <span class="na-when">{{ dueLabel(c) }}</span>
+                    }
+                  </div>
+                }
+
+                @if (noteFor() === c.id) {
+                  <div class="note-row">
+                    <input class="ui-input note-input" type="text"
+                           placeholder="Note, then Enter…"
+                           [(ngModel)]="noteText" name="note"
+                           [disabled]="noteBusy()"
+                           (keyup.enter)="saveNote(c)"
+                           (keyup.escape)="cancelNote()" />
+                    <button class="qa-btn" type="button" (click)="cancelNote()">✕</button>
+                  </div>
+                } @else {
+                  <div class="qa-row">
+                    <button class="qa-btn" type="button" title="Add note" (click)="startNote(c)">Note</button>
+                    <button class="qa-btn" type="button" title="Send WhatsApp"
+                            (click)="openMessage(c, 'whatsapp')">WhatsApp</button>
+                    <button class="qa-btn" type="button" title="Send email"
+                            (click)="openMessage(c, 'email')">Email</button>
+                  </div>
+                }
+              </article>
+            } @empty {
+              <p class="col-empty">No contacts yet</p>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+
+  <app-quick-action-modal
+    [kind]="openAction()"
+    [defaultRecipient]="defaultRecipient()"
+    [busy]="actionBusy()"
+    [error]="actionError()"
+    (submitted)="handleAction($event)"
+    (closed)="closeAction()" />
+
+  @if (toast()) { <div class="ui-toast">{{ toast() }}</div> }
+</div>

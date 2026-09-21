@@ -4,34 +4,63 @@
     <div class="tools">
       <input
         type="search"
-        placeholder="Search name, email, phone…"
+        placeholder="Search name, email, phone, company…"
         [(ngModel)]="search"
         (keyup.enter)="onSearch()" />
+      <select class="status-filter" [(ngModel)]="statusFilter" (change)="onSearch()">
+        <option [ngValue]="''">All statuses</option>
+        @for (s of statuses; track s.value; let i = $index) {
+          <option [ngValue]="i">{{ s.label }}</option>
+        }
+      </select>
       <button class="btn" (click)="onSearch()">Search</button>
+      <button class="btn primary" (click)="openCreate()">+ New contact</button>
     </div>
   </header>
+
+  @if (companyFilter) {
+    <p class="filter-note">
+      Showing contacts for one company.
+      <button class="link" (click)="clearCompanyFilter()">Show all</button>
+    </p>
+  }
 
   @if (loading()) {
     <p class="state">Loading…</p>
   } @else if (error()) {
     <p class="state error">{{ error() }}</p>
   } @else if (contacts().length === 0) {
-    <p class="state">No contacts found.</p>
+    <div class="state">
+      <p>No contacts yet.</p>
+      <button class="btn primary" (click)="openCreate()">+ Add your first contact</button>
+    </div>
   } @else {
     <table class="grid">
       <thead>
         <tr>
-          <th>Name</th><th>Email</th><th>Phone</th><th>Company</th><th></th>
+          <th>Name</th><th>Status</th><th>Next action</th><th>Email</th><th>Phone</th><th>Company</th><th></th>
         </tr>
       </thead>
       <tbody>
         @for (c of contacts(); track c.id) {
-          <tr>
+          <tr [class]="'row-' + c.status.toLowerCase()">
             <td><a [routerLink]="['/contacts', c.id]">{{ c.fullName }}</a></td>
+            <td>
+              <span class="pill" [class]="'pill ' + c.status.toLowerCase()">{{ c.status }}</span>
+            </td>
+            <td class="na-cell">
+              @if (c.nextAction) {
+                <span class="na-txt">{{ c.nextAction }}</span>
+                @if (c.nextActionDate) {
+                  <span class="na-tag" [class.overdue]="isOverdue(c)">{{ dueLabel(c) }}</span>
+                }
+              } @else { <span class="dash">—</span> }
+            </td>
             <td>{{ c.email || '—' }}</td>
             <td>{{ c.phone || '—' }}</td>
             <td>{{ c.companyName || '—' }}</td>
             <td class="row-actions">
+              <button class="link" (click)="openEdit(c)">Edit</button>
               <button class="link danger" (click)="remove(c)">Delete</button>
             </td>
           </tr>
@@ -47,4 +76,11 @@
       </div>
     </footer>
   }
+
+  <app-contact-form
+    [mode]="formMode()"
+    [busy]="formBusy()"
+    [error]="formError()"
+    (saved)="saveForm($event)"
+    (closed)="closeForm()" />
 </div>

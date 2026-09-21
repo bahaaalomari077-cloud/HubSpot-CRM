@@ -6,6 +6,18 @@ namespace Crm.Application.Timeline;
 
 public class TimelineService : ITimelineService
 {
+    /// <summary>
+    /// Cap rows pulled from each source, so a contact with thousands of messages
+    /// doesn't load them all into memory. The merged list is sorted afterwards.
+    /// </summary>
+    private const int MaxPerSource = 50;
+
+    /// <summary>Total entries returned across both sources.</summary>
+    private const int MaxTotal = 50;
+
+    /// <summary>Message bodies are truncated to a preview in the timeline.</summary>
+    private const int BodyPreviewLength = 280;
+
     private readonly ICrmDbContext _db;
 
     public TimelineService(ICrmDbContext db) => _db = db;
@@ -24,9 +36,11 @@ public class TimelineService : ITimelineService
                 OccurredAt = a.CreatedAt,
                 Title = a.Subject,
                 Detail = a.Description,
-                Tag = a.Type.ToString(),
+                SubType = a.Type.ToString(),   // Call | Meeting | Note | Task …
                 IsCompleted = a.IsCompleted
             })
+            .OrderByDescending(i => i.OccurredAt)
+            .Take(MaxPerSource)
             .ToListAsync(ct);
 
         var messages = await _db.Messages.AsNoTracking()
@@ -37,16 +51,22 @@ public class TimelineService : ITimelineService
                 Kind = TimelineItemKind.Message,
                 OccurredAt = m.SentAt,
                 Title = m.Subject ?? m.Channel.ToString(),
-                Detail = m.Body,
-                Tag = m.Channel.ToString(),
+                // Preview only — don't ship full email bodies to the timeline.
+                Detail = m.Body.Length > BodyPreviewLength
+                    ? m.Body.Substring(0, BodyPreviewLength)
+                    : m.Body,
+                SubType = m.Channel.ToString(),  // Email | WhatsApp | Sms | Telegram …
                 Direction = m.Direction.ToString()
             })
+            .OrderByDescending(i => i.OccurredAt)
+            .Take(MaxPerSource)
             .ToListAsync(ct);
 
         // --- merge + sort descending by moment ---
         var merged = activities
             .Concat(messages)
             .OrderByDescending(i => i.OccurredAt)
+            .Take(MaxTotal)          // 50 most recent entries overall
             .ToList();
 
         // --- group by calendar date (in the item's own offset) ---

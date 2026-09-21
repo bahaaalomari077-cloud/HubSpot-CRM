@@ -1,4 +1,4 @@
-.tl-empty { color: #667085; padding: 24px 0; }
+.tl-empty { color: var(--text-muted); padding: 24px 0; }
 
 .tl { display: flex; flex-direction: column; gap: 24px; }
 
@@ -7,9 +7,9 @@
   display: flex; align-items: center; gap: 8px;
   position: sticky; top: 0; background: #fff; padding: 4px 0; z-index: 1;
 }
-.tl-date-label { font-size: 13px; font-weight: 700; color: #101828; }
+.tl-date-label { font-size: 13px; font-weight: 700; color: var(--text); }
 .tl-date-count {
-  font-size: 11px; color: #667085; background: #f0f2f5;
+  font-size: 11px; color: var(--text-muted); background: var(--bg-hover);
   border-radius: 10px; padding: 1px 8px;
 }
 
@@ -21,7 +21,7 @@
 /* vertical connector line */
 .tl-item::before {
   content: ''; position: absolute; left: 15px; top: 32px; bottom: -4px;
-  width: 2px; background: #eceef1;
+  width: 2px; background: var(--border);
 }
 .tl-item:last-child::before { display: none; }
 
@@ -33,17 +33,26 @@
 
 .tl-body { padding-top: 4px; }
 .tl-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.tl-title { font-size: 14px; color: #101828; }
+.tl-title { font-size: 14px; color: var(--text); }
 .tl-chip {
   font-size: 10px; text-transform: uppercase; letter-spacing: .05em;
-  background: #f0f2f5; color: #667085; padding: 2px 8px; border-radius: 10px;
+  background: var(--bg-hover); color: var(--text-muted); padding: 2px 8px; border-radius: 10px;
 }
 .tl-dir {
   font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
-  background: #eaf2ff; color: #2f6df6;
+  background: var(--accent-soft); color: var(--accent);
 }
-.tl-dir.in { background: #e7f7ec; color: #15803d; }
-.tl-done { font-size: 11px; color: #15803d; font-weight: 600; }
+.tl-dir.in { background: #ecfdf5; color: var(--success); }
+.tl-done { font-size: 11px; color: var(--success); font-weight: 600; }
 
-.tl-detail { margin: 4px 0; color: #475467; font-size: 13px; line-height: 1.5; }
-.tl-time { color: #98a2b3; font-size: 12px; }
+.tl-detail { margin: 4px 0; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+.tl-time { color: var(--text-subtle); font-size: 12px; }
+
+/* Tinted icon instead of a solid saturated circle. */
+.tl-icon {
+  width: 28px; height: 28px;
+  background: var(--bg-hover) !important;   /* base; the tint is layered below */
+  border: 1px solid var(--border);
+  position: relative;
+}
+.tl-icon svg { width: 14px; height: 14px; color: var(--text-muted); }

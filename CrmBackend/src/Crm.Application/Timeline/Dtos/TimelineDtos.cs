@@ -22,8 +22,12 @@ public class TimelineItemDto
     public string Title { get; set; } = string.Empty;
     public string? Detail { get; set; }
 
-    /// <summary>Sub-type used to pick an icon: "Call", "Meeting", "Email", "WhatsApp", …</summary>
-    public string Tag { get; set; } = string.Empty;
+    /// <summary>
+    /// Sub-type used to pick an icon.
+    /// Activities → "Call", "Meeting", "Note", "Task" (ActivityType).
+    /// Messages   → "Email", "WhatsApp", "Sms", "Telegram" (MessageChannel).
+    /// </summary>
+    public string SubType { get; set; } = string.Empty;
 
     /// <summary>For messages: "Inbound"/"Outbound"; null for activities.</summary>
     public string? Direction { get; set; }

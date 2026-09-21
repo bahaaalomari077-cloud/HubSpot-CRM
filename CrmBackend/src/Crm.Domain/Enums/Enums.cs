@@ -1,5 +1,19 @@
 namespace Crm.Domain.Enums;
 
+/// <summary>
+/// Where a contact stands with us. Set manually by the admin — no workflow engine,
+/// no transition rules. Any status can move to any other.
+/// </summary>
+public enum ContactStatus
+{
+    Potential = 0,   // suggested, no contact yet
+    Contacted = 1,   // message sent, waiting response
+    Interested = 2,
+    Applied = 3,
+    Client = 4,      // joined
+    Rejected = 5
+}
+
 /// <summary>Pipeline semantic — copied from Bitrix24's P/S/F stage-group model.</summary>
 public enum StageSemantic
 {

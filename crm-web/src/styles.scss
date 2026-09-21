@@ -1,1 +1,237 @@
-/* You can add global styles to this file, and also import other style files */
+/* ===========================================================================
+   CRM design system — neutral surfaces, one accent, status colors.
+   Notion/Linear feel: light, quiet borders, small radii, generous spacing.
+   =========================================================================== */
+
+:root {
+  /* surfaces */
+  --bg:            #ffffff;   /* page */
+  --bg-subtle:     #f8fafc;   /* columns, table headers */
+  --bg-hover:      #f1f5f9;
+  --surface:       #ffffff;   /* cards, panels */
+
+  /* borders */
+  --border:        #e5e7eb;
+  --border-strong: #d1d5db;
+
+  /* text */
+  --text:          #111827;
+  --text-muted:    #6b7280;
+  --text-subtle:   #9ca3af;
+
+  /* accent */
+  --accent:        #6366f1;   /* indigo */
+  --accent-hover:  #4f46e5;
+  --accent-soft:   #eef2ff;
+
+  /* status accents */
+  --s-suggested:   #94a3b8;
+  --s-contacted:   #3b82f6;
+  --s-interested:  #f59e0b;
+  --s-applied:     #8b5cf6;
+  --s-client:      #10b981;
+  --s-rejected:    #ef4444;
+
+  /* semantic */
+  --danger:        #ef4444;
+  --danger-soft:   #fef2f2;
+  --success:       #10b981;
+
+  /* radii */
+  --r-sm: 6px;
+  --r:    8px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+
+  /* shadows — barely there */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .04);
+  --shadow:    0 1px 3px rgba(16, 24, 40, .06), 0 1px 2px rgba(16, 24, 40, .04);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, .08);
+  --shadow-lg: 0 12px 28px rgba(16, 24, 40, .12);
+
+  /* spacing scale */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;
+  --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01';   /* Inter's nicer letterforms */
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.011em; color: var(--text); }
+h1 { font-size: 20px; }
+h2 { font-size: 16px; }
+h3 { font-size: 14px; }
+
+/* ---------- shared controls ---------- */
+.ui-input,
+.ui-select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .1s, box-shadow .1s;
+}
+.ui-input::placeholder { color: var(--text-subtle); }
+.ui-input:hover,
+.ui-select:hover { border-color: var(--border-strong); }
+.ui-input:focus,
+.ui-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.ui-select { cursor: pointer; }
+
+.ui-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: background .1s, border-color .1s;
+}
+.ui-btn:hover:not(:disabled) { background: var(--bg-hover); border-color: var(--border-strong); }
+.ui-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.ui-btn--primary {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+.ui-btn--primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.ui-btn--ghost { border-color: transparent; background: transparent; }
+.ui-btn--ghost:hover:not(:disabled) { background: var(--bg-hover); border-color: transparent; }
+
+.ui-link {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: 13px; color: var(--accent);
+}
+.ui-link:hover { text-decoration: underline; }
+.ui-link--danger { color: var(--danger); }
+
+/* ---------- surfaces ---------- */
+.ui-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- tables ---------- */
+.ui-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ui-table th {
+  text-align: left; padding: 10px 14px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.ui-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); }
+.ui-table tbody tr:last-child td { border-bottom: 0; }
+.ui-table tbody tr:hover { background: var(--bg-subtle); }
+
+/* ---------- badges ---------- */
+.ui-badge {
+  display: inline-block;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+
+/* ---------- toast ---------- */
+.ui-toast {
+  position: fixed; bottom: var(--sp-6); left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff;
+  padding: 9px 16px; border-radius: var(--r);
+  font-size: 13px; box-shadow: var(--shadow-lg); z-index: 100;
+}
+
+/* ---------- scrollbars ---------- */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong); border-radius: 999px;
+  border: 2px solid transparent; background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); background-clip: content-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ===========================================================================
+   Status pills — tinted, not solid. A saturated block of color on every row
+   is the single loudest thing in a list view.
+   =========================================================================== */
+:root {
+  --s-suggested-bg:  #f1f5f9;  --s-suggested-fg:  #475569;
+  --s-contacted-bg:  #eff6ff;  --s-contacted-fg:  #1d4ed8;
+  --s-interested-bg: #fffbeb;  --s-interested-fg: #b45309;
+  --s-applied-bg:    #f5f3ff;  --s-applied-fg:    #6d28d9;
+  --s-client-bg:     #ecfdf5;  --s-client-fg:     #047857;
+  --s-rejected-bg:   #fef2f2;  --s-rejected-fg:   #b91c1c;
+}
+
+/* Any element with .pill / .ui-badge gets the quiet treatment by status. */
+.pill, .ui-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: nowrap;
+  background: var(--s-suggested-bg);
+  color: var(--s-suggested-fg);
+}
+.pill--potential,  .pill.potential  { background: var(--s-suggested-bg);  color: var(--s-suggested-fg); }
+.pill--contacted,  .pill.contacted  { background: var(--s-contacted-bg);  color: var(--s-contacted-fg); }
+.pill--interested, .pill.interested { background: var(--s-interested-bg); color: var(--s-interested-fg); }
+.pill--applied,    .pill.applied    { background: var(--s-applied-bg);    color: var(--s-applied-fg); }
+.pill--client,     .pill.client     { background: var(--s-client-bg);     color: var(--s-client-fg); }
+.pill--rejected,   .pill.rejected   { background: var(--s-rejected-bg);   color: var(--s-rejected-fg); }
+
+/* Row tints: a hairline rail instead of a full-width wash. */
+tr.row-interested, tr.row-applied, tr.row-client {
+  background: transparent !important;
+}
+tr.row-interested td:first-child { box-shadow: inset 2px 0 0 #f59e0b; }
+tr.row-applied    td:first-child { box-shadow: inset 2px 0 0 #8b5cf6; }
+tr.row-client     td:first-child { box-shadow: inset 2px 0 0 #10b981; }
+tr.row-rejected   { opacity: .55; }
+
+/* ===========================================================================
+   Table hygiene — a <td> must stay a table cell. `display:flex` on one breaks
+   row alignment and leaves stray gaps.
+   =========================================================================== */
+.grid td.row-actions,
+.ui-table td.row-actions {
+  display: table-cell;
+  text-align: right;
+  white-space: nowrap;
+}
+.grid td.row-actions > *,
+.ui-table td.row-actions > * { margin-left: var(--sp-3); }
+
+/* Keep every row the same height: the next-action tag sits inline, not stacked. */
+.grid td.na-cell, .ui-table td.na-cell { white-space: nowrap; }
+.grid .na-txt, .ui-table .na-txt { display: inline; }
+.grid .na-tag, .ui-table .na-tag { margin-top: 0; margin-left: var(--sp-2); }

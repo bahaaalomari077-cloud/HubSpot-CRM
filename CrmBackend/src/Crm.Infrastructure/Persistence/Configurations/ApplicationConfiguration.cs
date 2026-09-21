@@ -17,6 +17,7 @@ public class ApplicationConfiguration : IEntityTypeConfiguration<ApplicationEnti
         // Enums stored as int (compact, index-friendly).
         b.Property(a => a.Stage).HasConversion<int>();
         b.Property(a => a.StageSemantic).HasConversion<int>();
+        b.Property(a => a.PreviousStageId).HasConversion<int?>();
 
         // Money as numeric(18,2) — the deliberate divergence from Bitrix24's double.
         b.Property(a => a.Amount).HasColumnType("numeric(18,2)");

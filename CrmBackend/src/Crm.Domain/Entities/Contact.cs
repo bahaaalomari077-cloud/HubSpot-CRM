@@ -1,4 +1,5 @@
 using Crm.Domain.Common;
+using Crm.Domain.Enums;
 
 namespace Crm.Domain.Entities;
 
@@ -9,6 +10,15 @@ public class Contact : BaseEntity
     public string? Email { get; set; }
     public string? Phone { get; set; }
     public string? Position { get; set; }
+
+    /// <summary>Where this contact stands. Set manually by the admin.</summary>
+    public ContactStatus Status { get; set; } = ContactStatus.Potential;
+
+    /// <summary>What the admin plans to do next, e.g. "Send the revised quote".</summary>
+    public string? NextAction { get; set; }
+
+    /// <summary>When that next action is due. Drives the dashboard's upcoming list.</summary>
+    public DateTimeOffset? NextActionDate { get; set; }
 
     public string FullName => $"{FirstName} {LastName}".Trim();
 
