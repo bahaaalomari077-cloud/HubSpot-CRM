@@ -1,0 +1,30 @@
+<div class="page">
+  <a class="back" routerLink="/contacts">← Back to contacts</a>
+
+  @if (loading()) {
+    <p class="state">Loading…</p>
+  } @else if (error()) {
+    <p class="state error">{{ error() }}</p>
+  } @else if (contact(); as c) {
+    <div class="layout">
+      <!-- profile card -->
+      <aside class="card profile">
+        <div class="avatar">{{ c.firstName.charAt(0) }}{{ c.lastName.charAt(0) }}</div>
+        <h1>{{ c.fullName }}</h1>
+        @if (c.position) { <p class="muted">{{ c.position }}</p> }
+        <dl>
+          <dt>Email</dt><dd>{{ c.email || '—' }}</dd>
+          <dt>Phone</dt><dd>{{ c.phone || '—' }}</dd>
+          <dt>Company</dt><dd>{{ c.companyName || '—' }}</dd>
+          <dt>Owner</dt><dd>{{ c.assignedToName || '—' }}</dd>
+        </dl>
+      </aside>
+
+      <!-- merged timeline (backend-combined activities + messages) -->
+      <section class="card">
+        <h2>Timeline</h2>
+        <app-timeline [groups]="groups()" />
+      </section>
+    </div>
+  }
+</div>

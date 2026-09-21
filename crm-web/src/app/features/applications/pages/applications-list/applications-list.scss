@@ -1,0 +1,22 @@
+.page { padding: 24px; }
+.page-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+h1 { margin: 0; font-size: 24px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.tools input, .tools select { padding: 8px 12px; border: 1px solid #d0d5dd; border-radius: 6px; }
+.tools input[type="number"] { width: 120px; }
+.btn { padding: 8px 14px; border: 1px solid #d0d5dd; border-radius: 6px; background: #fff; cursor: pointer; }
+.btn:hover { background: #f5f6f8; }
+
+.grid { width: 100%; border-collapse: collapse; }
+.grid th, .grid td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eceef1; }
+.grid th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #667085; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+.pill.process { background: #eaf2ff; color: #2f6df6; }
+.pill.success { background: #e7f7ec; color: #15803d; }
+.pill.failure { background: #fdeceb; color: #dc2626; }
+
+.count { margin-top: 14px; color: #667085; font-size: 13px; }
+.state { padding: 32px 0; color: #667085; }
+.state.error { color: #dc2626; }

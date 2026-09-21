@@ -1,0 +1,32 @@
+<div class="page">
+  <h1>Dashboard</h1>
+
+  @if (loading()) {
+    <p class="state">Loading…</p>
+  } @else if (error()) {
+    <p class="state error">{{ error() }}</p>
+  } @else {
+    <div class="tiles">
+      <a class="tile" routerLink="/contacts">
+        <span class="k">Contacts</span>
+        <span class="v">{{ contactCount() }}</span>
+      </a>
+      <a class="tile" routerLink="/applications">
+        <span class="k">Companies</span>
+        <span class="v">{{ companyCount() }}</span>
+      </a>
+      <a class="tile" routerLink="/applications">
+        <span class="k">Open applications</span>
+        <span class="v">{{ openCount() }}</span>
+      </a>
+      <div class="tile accent">
+        <span class="k">Pipeline value</span>
+        <span class="v">{{ pipelineValue() | currency:'USD':'symbol':'1.0-0' }}</span>
+      </div>
+      <div class="tile success">
+        <span class="k">Won</span>
+        <span class="v">{{ wonCount() }}</span>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,39 @@
+<div class="page">
+  <header class="page-head">
+    <h1>Applications</h1>
+    <div class="tools">
+      <input type="search" placeholder="Search title…" [(ngModel)]="search" (keyup.enter)="load()" />
+      <select [(ngModel)]="stageFilter" (change)="load()">
+        @for (s of stages; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }
+      </select>
+      <input type="number" placeholder="Min amount" [(ngModel)]="minAmount" (keyup.enter)="load()" />
+      <button class="btn" (click)="load()">Apply</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Loading…</p>
+  } @else if (error()) {
+    <p class="state error">{{ error() }}</p>
+  } @else if (items().length === 0) {
+    <p class="state">No applications match.</p>
+  } @else {
+    <table class="grid">
+      <thead>
+        <tr><th>Title</th><th>Stage</th><th>Amount</th><th>Contact</th><th>Company</th></tr>
+      </thead>
+      <tbody>
+        @for (a of items(); track a.id) {
+          <tr>
+            <td>{{ a.title }}</td>
+            <td><span class="pill" [class]="semanticClass(a)">{{ a.stage }}</span></td>
+            <td class="num">{{ a.amount | currency:a.currencyCode }}</td>
+            <td>{{ a.contactName || '—' }}</td>
+            <td>{{ a.companyName || '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <p class="count">{{ totalCount() }} applications</p>
+  }
+</div>

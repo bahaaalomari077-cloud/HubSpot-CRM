@@ -1,0 +1,623 @@
+<title>Default Pipeline Kanban</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
+<style>
+  :root{
+    --ground:#eef0f4;
+    --app:#f4f5f8;
+    --rail:#2c2c54;
+    --rail-ink:#b9b9d8;
+    --rail-ink-on:#ffffff;
+    --nav:#33335e;
+    --nav-ink:#e6e6f5;
+    --panel:#ffffff;
+    --panel-2:#f7f8fa;
+    --ink:#1b1b2b;
+    --ink-2:#5b5b73;
+    --ink-3:#8b8ba3;
+    --line:#dfe2e9;
+    --line-2:#eaecef;
+    --track:#e4ebee;
+    --accent:#39a8ef;
+    --won:#3bc864;
+    --lost:#f1361d;
+    --shadow:0 1px 2px rgba(28,28,60,.10), 0 4px 12px rgba(28,28,60,.06);
+    --shadow-lift:0 6px 20px rgba(28,28,60,.22);
+    --radius:6px;
+
+    --s-new:#39a8ef;
+    --s-papers:#2fc6f6;
+    --s-invoice:#55d0e0;
+    --s-progress:#47e4c2;
+    --s-final:#ffa900;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#1a1a33;
+      --app:#232345;
+      --rail:#16162e;
+      --rail-ink:#8f8fc0;
+      --panel:#2b2b52;
+      --panel-2:#33335c;
+      --ink:#f0f0fa;
+      --ink-2:#b6b6d4;
+      --ink-3:#8a8ab0;
+      --line:#3d3d6b;
+      --line-2:#373765;
+      --track:#2f2f58;
+      --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.26);
+      --shadow-lift:0 8px 26px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1a1a33;
+    --app:#232345;
+    --rail:#16162e;
+    --rail-ink:#8f8fc0;
+    --panel:#2b2b52;
+    --panel-2:#33335c;
+    --ink:#f0f0fa;
+    --ink-2:#b6b6d4;
+    --ink-3:#8a8ab0;
+    --line:#3d3d6b;
+    --line-2:#373765;
+    --track:#2f2f58;
+    --shadow:0 1px 2px rgba(0,0,0,.34), 0 4px 14px rgba(0,0,0,.26);
+    --shadow-lift:0 8px 26px rgba(0,0,0,.5);
+  }
+
+  html,body{height:100%;}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);
+    font-family:"Open Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  }
+  *{box-sizing:border-box;}
+  button{font:inherit;color:inherit;}
+  [hidden]{display:none!important;}
+
+  .app{display:grid;grid-template-columns:56px 1fr;height:100%;background:var(--app);}
+
+  /* ---------- left rail ---------- */
+  .rail{
+    background:var(--rail);display:flex;flex-direction:column;align-items:center;gap:4px;
+    padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    overflow:hidden;
+  }
+  .rail-btn{
+    width:38px;height:38px;border:0;border-radius:9px;background:transparent;color:var(--rail-ink);
+    display:grid;place-items:center;cursor:pointer;flex:0 0 auto;
+  }
+  .rail-btn:hover{background:rgba(255,255,255,.09);color:var(--rail-ink-on);}
+  .rail-btn[aria-current="page"]{background:var(--accent);color:#fff;}
+  .rail-btn svg{width:19px;height:19px;display:block;}
+  .rail-sep{height:1px;width:26px;background:rgba(255,255,255,.12);margin:5px 0;flex:0 0 auto;}
+
+  /* ---------- main ---------- */
+  .main{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--app);}
+
+  .topnav{
+    background:var(--nav);color:var(--nav-ink);display:flex;align-items:center;gap:6px;
+    padding:0 12px;height:52px;flex:0 0 auto;
+    padding-top:env(safe-area-inset-top,0px);
+  }
+  .tab{
+    border:0;background:transparent;color:var(--nav-ink);opacity:.82;
+    padding:6px 12px;border-radius:16px;cursor:pointer;white-space:nowrap;font-size:13px;
+  }
+  .tab:hover{opacity:1;background:rgba(255,255,255,.10);}
+  .tab.on{background:rgba(255,255,255,.17);opacity:1;font-weight:600;}
+  .topnav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .pill-buy{background:#3bc864;color:#fff;border:0;border-radius:14px;padding:5px 13px;font-weight:600;cursor:pointer;font-size:12px;}
+  .pill-ghost{background:rgba(255,255,255,.14);border:0;border-radius:14px;padding:5px 13px;cursor:pointer;color:var(--nav-ink);font-size:12px;}
+  .clock{
+    display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.14);
+    border-radius:16px;padding:3px 4px 3px 10px;font-variant-numeric:tabular-nums;font-size:12px;
+  }
+  .avatar{width:25px;height:25px;border-radius:50%;background:linear-gradient(140deg,#7a7ad4,#4a4a9e);display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{padding:14px 18px 0;flex:0 0 auto;}
+  .row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  h1{font-size:24px;font-weight:600;margin:0;letter-spacing:-.01em;}
+  .btn-create{
+    background:#3bc864;color:#fff;border:0;border-radius:var(--radius);
+    padding:7px 16px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .btn-create:hover{background:#34b559;}
+  .chip{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;color:var(--ink-2);
+  }
+  .chip:hover{border-color:var(--ink-3);}
+  .search{
+    flex:1 1 200px;min-width:140px;max-width:420px;display:flex;align-items:center;gap:8px;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:6px 12px;
+  }
+  .search input{border:0;outline:0;background:transparent;flex:1;min-width:0;color:var(--ink);font:inherit;}
+  .search input::placeholder{color:var(--ink-3);}
+
+  .row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .segmented{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .segmented button{border:0;background:transparent;padding:6px 14px;cursor:pointer;color:var(--ink-2);}
+  .segmented button.on{background:var(--accent);color:#fff;font-weight:600;}
+  .segmented button:not(.on):hover{background:var(--panel-2);}
+  .counter{
+    display:inline-flex;align-items:center;gap:7px;background:var(--panel);
+    border:1px solid var(--line);border-radius:var(--radius);padding:5px 12px;color:var(--ink-2);
+  }
+  .counter b{
+    background:var(--line-2);color:var(--ink-2);border-radius:9px;
+    padding:1px 7px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+  }
+  .counter.hot b{background:var(--lost);color:#fff;}
+  .row2-right{margin-left:auto;display:flex;gap:8px;}
+
+  /* ---------- board ---------- */
+  .board-wrap{flex:1 1 auto;min-height:0;overflow-x:auto;overflow-y:hidden;padding:16px 18px 18px;}
+  .board{display:flex;gap:10px;align-items:flex-start;height:100%;min-height:0;}
+
+  .col{
+    flex:0 0 250px;width:250px;display:flex;flex-direction:column;
+    height:100%;min-height:0;border-radius:var(--radius);
+  }
+  .col-head{
+    background:var(--stage);color:#fff;border-radius:var(--radius) var(--radius) 0 0;
+    padding:8px 10px 10px;flex:0 0 auto;
+  }
+  .col-title{display:flex;align-items:center;gap:7px;}
+  .col-name{font-weight:700;font-size:13px;letter-spacing:.005em;flex:1;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.14);}
+  .col-count{
+    font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+    background:rgba(255,255,255,.26);border-radius:9px;padding:1px 7px;
+  }
+  .col-gear{
+    border:0;background:transparent;color:rgba(255,255,255,.85);cursor:pointer;
+    padding:2px;border-radius:4px;display:grid;place-items:center;
+  }
+  .col-gear:hover{background:rgba(255,255,255,.2);color:#fff;}
+  .col-sum{
+    margin-top:8px;background:rgba(255,255,255,.17);border-radius:13px;
+    padding:3px 12px;font-weight:700;font-variant-numeric:tabular-nums;
+    text-align:center;font-size:13px;
+  }
+  .col-add{
+    margin-top:7px;width:100%;border:0;border-radius:var(--radius);
+    background:rgba(255,255,255,.16);color:#fff;padding:6px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;
+  }
+  .col-add:hover{background:rgba(255,255,255,.28);}
+
+  .col-body{
+    flex:1 1 auto;min-height:60px;overflow-y:auto;overflow-x:hidden;
+    background:var(--track);border-radius:0 0 var(--radius) var(--radius);
+    padding:8px;display:flex;flex-direction:column;gap:8px;
+  }
+  .col-body.over{box-shadow:inset 0 0 0 2px var(--stage);background:color-mix(in srgb,var(--stage) 12%,var(--track));}
+  .col-empty{
+    border:1px dashed var(--ink-3);border-radius:var(--radius);color:var(--ink-3);
+    text-align:center;padding:14px 10px;font-size:12px;
+  }
+
+  /* ---------- deal card ---------- */
+  .card{
+    background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);
+    border-left:3px solid var(--stage);padding:9px 10px;cursor:grab;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .card:active{cursor:grabbing;}
+  .card.dragging{opacity:.45;box-shadow:var(--shadow-lift);}
+  .card:focus-visible,.col-add:focus-visible,.tab:focus-visible,.chip:focus-visible,
+  .btn-create:focus-visible,.rail-btn:focus-visible,.segmented button:focus-visible{
+    outline:2px solid var(--accent);outline-offset:2px;
+  }
+  .card-top{display:flex;align-items:flex-start;gap:8px;}
+  .card-name{font-weight:600;font-size:13px;color:var(--ink);flex:1;min-width:0;overflow-wrap:anywhere;}
+  .card-amount{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:13px;}
+  .card-co{color:var(--ink-2);font-size:12px;overflow-wrap:anywhere;}
+  .card-foot{display:flex;align-items:center;gap:7px;margin-top:1px;}
+  .who{
+    width:22px;height:22px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+    font-size:9px;font-weight:700;color:#fff;letter-spacing:.02em;
+  }
+  .card-date{color:var(--ink-3);font-size:11px;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap;}
+  .flag{
+    display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;
+  }
+  .flag.overdue{background:rgba(241,54,29,.13);color:var(--lost);}
+  .flag.today{background:rgba(255,169,0,.16);color:#b87400;}
+  :root[data-theme="dark"] .flag.today{color:#ffc24d;}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .flag.today{color:#ffc24d;}}
+
+  /* ---------- drop zones ---------- */
+  .zones{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    padding:0 18px 14px;flex:0 0 auto;
+  }
+  .zone{
+    border-radius:var(--radius);border:2px dashed transparent;color:#fff;
+    padding:12px;text-align:center;font-weight:700;letter-spacing:.02em;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .zone.won{background:var(--won);}
+  .zone.lost{background:var(--lost);}
+  .zone.over{border-color:#fff;transform:scale(1.015);}
+  .zone small{display:block;font-weight:400;opacity:.9;font-size:11px;letter-spacing:0;}
+
+  /* ---------- summary strip ---------- */
+  .strip{
+    display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+    padding:10px 18px;border-top:1px solid var(--line);background:var(--panel);flex:0 0 auto;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  }
+  .stat{display:flex;flex-direction:column;gap:1px;}
+  .stat .k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700;}
+  .stat .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .stat .v.won{color:var(--won);}
+  .stat .v.lost{color:var(--lost);}
+  .strip-note{margin-left:auto;color:var(--ink-3);font-size:11px;max-width:340px;text-align:right;}
+
+  @media (max-width:760px){
+    .app{grid-template-columns:0 1fr;}
+    .rail{display:none;}
+    .topnav{padding:0 10px;overflow-x:auto;}
+    .toolbar{padding:12px 16px 0;}
+    .board-wrap{padding:12px 16px 14px;}
+    .zones{padding:0 16px 12px;}
+    .strip{padding-left:16px;padding-right:16px;gap:14px;}
+    .strip-note{display:none;}
+    h1{font-size:20px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+
+<div class="app">
+  <nav class="rail" aria-label="Workspace">
+    <button class="rail-btn" aria-current="page" title="CRM" aria-label="CRM">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+    </button>
+    <button class="rail-btn" title="Booking" aria-label="Booking">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
+    </button>
+    <button class="rail-btn" title="Inventory management" aria-label="Inventory management">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 12l9 5 9-5M3 16l9 5 9-5"/></svg>
+    </button>
+    <button class="rail-btn" title="Marketing" aria-label="Marketing">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h3l5 4V6L7 10H4a1 1 0 00-1 1z"/><path d="M17 9a4 4 0 010 6"/></svg>
+    </button>
+    <button class="rail-btn" title="Sites and stores" aria-label="Sites and stores">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h16l-1 11H5L4 9z"/><path d="M9 9V6a3 3 0 016 0v3"/></svg>
+    </button>
+    <button class="rail-btn" title="Tasks" aria-label="Tasks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+    </button>
+    <button class="rail-btn" title="Collaboration" aria-label="Collaboration">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="3"/><path d="M3 20a6 6 0 0112 0M16 7a3 3 0 010 6M18 20a6 6 0 00-2-4.5"/></svg>
+    </button>
+    <button class="rail-btn" title="BI Builder" aria-label="BI Builder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>
+    </button>
+    <button class="rail-btn" title="Employees" aria-label="Employees">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0"/></svg>
+    </button>
+    <button class="rail-btn" title="Automation" aria-label="Automation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M12 8V4M9 13h.01M15 13h.01"/></svg>
+    </button>
+    <div class="rail-sep"></div>
+    <button class="rail-btn" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" stroke-linecap="round"/></svg>
+    </button>
+  </nav>
+
+  <div class="main">
+    <header class="topnav">
+      <button class="tab on">Deals</button>
+      <button class="tab">Inventory</button>
+      <button class="tab">Customers</button>
+      <button class="tab">Sales</button>
+      <button class="tab">Analytics</button>
+      <button class="tab">More</button>
+      <div class="topnav-right">
+        <button class="pill-ghost">Invite</button>
+        <button class="pill-buy">Buy Now</button>
+        <button class="pill-ghost">Helpdesk</button>
+        <div class="clock"><span id="clock">11:26 AM</span><span class="avatar">MA</span></div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="row1">
+        <h1>Deals</h1>
+        <button class="btn-create">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Create
+        </button>
+        <button class="chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+          Default pipeline
+        </button>
+        <div class="search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="q" type="search" placeholder="Search deals, companies, owners…" aria-label="Search deals">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="segmented">
+          <button class="on">Kanban</button>
+          <button>List</button>
+          <button>Activities</button>
+          <button>Calendar</button>
+        </div>
+        <span class="counter hot"><b id="c-overdue">0</b> Overdue</span>
+        <span class="counter"><b id="c-today">0</b> Due today</span>
+        <span class="counter"><b id="c-open">0</b> In progress</span>
+        <div class="row2-right">
+          <button class="chip">Automation rules</button>
+          <button class="chip">Extensions</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="zones" id="zones" hidden>
+      <div class="zone won" data-zone="won">Deal won <small>Move here to close as won</small></div>
+      <div class="zone lost" data-zone="lost">Deal lost <small>Move here to close as lost</small></div>
+    </div>
+
+    <footer class="strip">
+      <div class="stat"><span class="k">Deals in progress</span><span class="v" id="s-count">0</span></div>
+      <div class="stat"><span class="k">Pipeline value</span><span class="v" id="s-value">$0</span></div>
+      <div class="stat"><span class="k">Average deal</span><span class="v" id="s-avg">$0</span></div>
+      <div class="stat"><span class="k">Won</span><span class="v won" id="s-won">$0</span></div>
+      <div class="stat"><span class="k">Lost</span><span class="v lost" id="s-lost">$0</span></div>
+      <p class="strip-note">Stages mirror the Default pipeline on b24-glmtze.bitrix24.com. Deals shown are sample records — the live board is currently empty.</p>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STAGES = [
+    {id:"new",      name:"New",           color:"var(--s-new)"},
+    {id:"papers",   name:"Create papers", color:"var(--s-papers)"},
+    {id:"invoice",  name:"Invoice",       color:"var(--s-invoice)"},
+    {id:"progress", name:"In progress",   color:"var(--s-progress)"},
+    {id:"final",    name:"Final invoice", color:"var(--s-final)"}
+  ];
+
+  var PEOPLE = {
+    MA:{name:"Mahmoud Almomani", tint:"#4a4a9e"},
+    RH:{name:"Rana Haddad",      tint:"#2f7fb8"},
+    KS:{name:"Khalid Saleh",     tint:"#3f9e7a"},
+    LN:{name:"Lina Nasser",      tint:"#a5673f"}
+  };
+
+  // Sample pipeline — replace with your own records.
+  var DEALS = [
+    {id:1,  name:"Al Mamoun Trading — ERP rollout",   co:"Al Mamoun Trading LLC", amount:48500, stage:"new",      who:"MA", due:"2026-09-24"},
+    {id:2,  name:"Jordan Steel — annual licences",    co:"Jordan Steel Co.",      amount:12200, stage:"new",      who:"RH", due:"2026-09-19"},
+    {id:3,  name:"Petra Logistics — fleet module",    co:"Petra Logistics",       amount:31000, stage:"new",      who:"KS", due:"2026-10-02"},
+    {id:4,  name:"Zaytouna Group — contract draft",   co:"Zaytouna Group",        amount:27400, stage:"papers",   who:"LN", due:"2026-09-21"},
+    {id:5,  name:"Amman Medical — supply agreement",  co:"Amman Medical Center",  amount:63800, stage:"papers",   who:"MA", due:"2026-09-26"},
+    {id:6,  name:"Irbid Textiles — Q4 invoice",       co:"Irbid Textiles",        amount:18900, stage:"invoice",  who:"RH", due:"2026-09-18"},
+    {id:7,  name:"Gulf Marine — dock equipment",      co:"Gulf Marine Services",  amount:94600, stage:"invoice",  who:"KS", due:"2026-09-30"},
+    {id:8,  name:"Nabil Foods — POS integration",     co:"Nabil Foods",           amount:22750, stage:"progress", who:"LN", due:"2026-10-08"},
+    {id:9,  name:"Aqaba Ports — telemetry pilot",     co:"Aqaba Ports Authority", amount:120000,stage:"progress", who:"MA", due:"2026-09-21"},
+    {id:10, name:"Cedar Bank — onboarding phase 2",   co:"Cedar Bank",            amount:57300, stage:"progress", who:"RH", due:"2026-10-15"},
+    {id:11, name:"Royal Hotels — final billing",      co:"Royal Hotels Group",    amount:41200, stage:"final",    who:"KS", due:"2026-09-23"},
+    {id:12, name:"Madaba Ceramics — closing invoice", co:"Madaba Ceramics",       amount:15600, stage:"final",    who:"LN", due:"2026-09-17"}
+  ];
+
+  var closed = {won:0, lost:0};
+  var board  = document.getElementById("board");
+  var zones  = document.getElementById("zones");
+  var qInput = document.getElementById("q");
+  var dragId = null;
+
+  var money = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+  var TODAY = "2026-09-21";
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function dueState(due){
+    if(due < TODAY) return "overdue";
+    if(due === TODAY) return "today";
+    return "";
+  }
+
+  function fmtDate(iso){
+    var p = iso.split("-");
+    var m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+p[1]-1];
+    return m + " " + (+p[2]);
+  }
+
+  function visible(){
+    var q = (qInput.value || "").trim().toLowerCase();
+    if(!q) return DEALS;
+    return DEALS.filter(function(d){
+      return (d.name + " " + d.co + " " + PEOPLE[d.who].name).toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function cardHTML(d){
+    var st = dueState(d.due);
+    var p  = PEOPLE[d.who];
+    var flag = st === "overdue" ? '<span class="flag overdue">Overdue</span>'
+             : st === "today"   ? '<span class="flag today">Due today</span>' : "";
+    return '<article class="card" draggable="true" tabindex="0" data-id="' + d.id + '"' +
+             ' aria-label="' + esc(d.name) + ', ' + money.format(d.amount) + '">' +
+             '<div class="card-top">' +
+               '<span class="card-name">' + esc(d.name) + '</span>' +
+               '<span class="card-amount">' + money.format(d.amount) + '</span>' +
+             '</div>' +
+             '<div class="card-co">' + esc(d.co) + '</div>' +
+             '<div class="card-foot">' +
+               '<span class="who" style="background:' + p.tint + '" title="' + esc(p.name) + '">' + d.who + '</span>' +
+               flag +
+               '<span class="card-date">' + fmtDate(d.due) + '</span>' +
+             '</div>' +
+           '</article>';
+  }
+
+  function render(){
+    var shown = visible();
+    board.innerHTML = STAGES.map(function(s){
+      var items = shown.filter(function(d){ return d.stage === s.id; });
+      var sum   = items.reduce(function(a,d){ return a + d.amount; }, 0);
+      var body  = items.length
+        ? items.map(cardHTML).join("")
+        : '<div class="col-empty">No deals in this stage</div>';
+      return '<section class="col" style="--stage:' + s.color + '" data-stage="' + s.id + '" aria-label="' + esc(s.name) + '">' +
+               '<header class="col-head">' +
+                 '<div class="col-title">' +
+                   '<span class="col-name">' + esc(s.name) + '</span>' +
+                   '<span class="col-count">' + items.length + '</span>' +
+                   '<button class="col-gear" aria-label="Edit stage ' + esc(s.name) + '">' +
+                     '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>' +
+                   '</button>' +
+                 '</div>' +
+                 '<div class="col-sum">' + money.format(sum) + '</div>' +
+                 '<button class="col-add" data-add="' + s.id + '">' +
+                   '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
+                   'Quick Deal</button>' +
+               '</header>' +
+               '<div class="col-body" data-drop="' + s.id + '">' + body + '</div>' +
+             '</section>';
+    }).join("");
+    stats();
+  }
+
+  function stats(){
+    var open  = DEALS.length;
+    var value = DEALS.reduce(function(a,d){ return a + d.amount; }, 0);
+    document.getElementById("s-count").textContent = open;
+    document.getElementById("s-value").textContent = money.format(value);
+    document.getElementById("s-avg").textContent   = money.format(open ? Math.round(value/open) : 0);
+    document.getElementById("s-won").textContent   = money.format(closed.won);
+    document.getElementById("s-lost").textContent  = money.format(closed.lost);
+    document.getElementById("c-open").textContent    = open;
+    document.getElementById("c-overdue").textContent = DEALS.filter(function(d){ return dueState(d.due) === "overdue"; }).length;
+    document.getElementById("c-today").textContent   = DEALS.filter(function(d){ return dueState(d.due) === "today"; }).length;
+  }
+
+  function move(id, stage){
+    var d = DEALS.find(function(x){ return x.id === id; });
+    if(d && d.stage !== stage){ d.stage = stage; render(); }
+  }
+
+  function close(id, outcome){
+    var i = DEALS.findIndex(function(x){ return x.id === id; });
+    if(i === -1) return;
+    closed[outcome] += DEALS[i].amount;
+    DEALS.splice(i,1);
+    render();
+  }
+
+  // --- drag and drop ---
+  board.addEventListener("dragstart", function(e){
+    var card = e.target.closest(".card");
+    if(!card) return;
+    dragId = +card.dataset.id;
+    card.classList.add("dragging");
+    zones.hidden = false;
+    try{ e.dataTransfer.setData("text/plain", String(dragId)); }catch(_){}
+    e.dataTransfer.effectAllowed = "move";
+  });
+
+  board.addEventListener("dragend", function(e){
+    var card = e.target.closest(".card");
+    if(card) card.classList.remove("dragging");
+    dragId = null;
+    zones.hidden = true;
+    Array.prototype.forEach.call(document.querySelectorAll(".over"), function(n){ n.classList.remove("over"); });
+  });
+
+  function wireDrop(root, attr, handler){
+    root.addEventListener("dragover", function(e){
+      var t = e.target.closest("[" + attr + "]");
+      if(!t || dragId === null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      t.classList.add("over");
+    });
+    root.addEventListener("dragleave", function(e){
+      var t = e.target.closest("[" + attr + "]");
+      if(t && !t.contains(e.relatedTarget)) t.classList.remove("over");
+    });
+    root.addEventListener("drop", function(e){
+      var t = e.target.closest("[" + attr + "]");
+      if(!t || dragId === null) return;
+      e.preventDefault();
+      t.classList.remove("over");
+      handler(dragId, t.getAttribute(attr));
+      dragId = null;
+      zones.hidden = true;
+    });
+  }
+
+  wireDrop(board, "data-drop", move);
+  wireDrop(zones, "data-zone", close);
+
+  // --- keyboard: move a focused card between stages ---
+  board.addEventListener("keydown", function(e){
+    var card = e.target.closest(".card");
+    if(!card) return;
+    if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    var id = +card.dataset.id;
+    var d  = DEALS.find(function(x){ return x.id === id; });
+    if(!d) return;
+    var i = STAGES.findIndex(function(s){ return s.id === d.stage; });
+    var n = e.key === "ArrowRight" ? Math.min(i+1, STAGES.length-1) : Math.max(i-1, 0);
+    if(n === i) return;
+    d.stage = STAGES[n].id;
+    render();
+    var again = board.querySelector('.card[data-id="' + id + '"]');
+    if(again) again.focus();
+  });
+
+  // --- quick deal ---
+  var nextId = 100;
+  board.addEventListener("click", function(e){
+    var add = e.target.closest("[data-add]");
+    if(!add) return;
+    var title = window.prompt("Deal name");
+    if(!title) return;
+    var amt = parseFloat(String(window.prompt("Amount (USD)", "10000") || "").replace(/[^0-9.]/g,""));
+    DEALS.push({
+      id: nextId++,
+      name: title,
+      co: "—",
+      amount: isFinite(amt) ? Math.round(amt) : 0,
+      stage: add.getAttribute("data-add"),
+      who: "MA",
+      due: TODAY
+    });
+    render();
+  });
+
+  qInput.addEventListener("input", render);
+
+  // --- clock ---
+  function tick(){
+    var el = document.getElementById("clock");
+    if(el) el.textContent = new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+  }
+  tick();
+  setInterval(tick, 30000);
+
+  render();
+})();
+</script>

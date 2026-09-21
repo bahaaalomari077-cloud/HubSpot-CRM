@@ -1,0 +1,610 @@
+<title>CRM Architecture Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --ground:#f6f7f9;
+    --paper:#ffffff;
+    --paper-2:#f0f2f5;
+    --ink:#14161d;
+    --ink-2:#4a5061;
+    --ink-3:#7c8395;
+    --line:#dde1e8;
+    --line-2:#eaedf2;
+    --accent:#2f6df6;
+    --accent-soft:#e8f0ff;
+    --core:#2f6df6;
+    --support:#6b54d3;
+    --ops:#0f9b8e;
+    --warn:#d97706;
+    --danger:#dc2626;
+    --ok:#15803d;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --radius:8px;
+    --shadow:0 1px 2px rgba(20,22,29,.06), 0 6px 18px rgba(20,22,29,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0f1116;
+      --paper:#171a21;
+      --paper-2:#1f232c;
+      --ink:#eef0f5;
+      --ink-2:#aeb5c4;
+      --ink-3:#7b8394;
+      --line:#2b303b;
+      --line-2:#232833;
+      --accent:#6d9bff;
+      --accent-soft:#1c2740;
+      --core:#6d9bff;
+      --support:#a08ef0;
+      --ops:#3ac6b6;
+      --warn:#f0a83c;
+      --danger:#f26d6d;
+      --ok:#4ec77e;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0f1116;
+    --paper:#171a21;
+    --paper-2:#1f232c;
+    --ink:#eef0f5;
+    --ink-2:#aeb5c4;
+    --ink-3:#7b8394;
+    --line:#2b303b;
+    --line-2:#232833;
+    --accent:#6d9bff;
+    --accent-soft:#1c2740;
+    --core:#6d9bff;
+    --support:#a08ef0;
+    --ops:#3ac6b6;
+    --warn:#f0a83c;
+    --danger:#f26d6d;
+    --ok:#4ec77e;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);
+    font-family:var(--sans);font-size:15px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding-inline:20px;padding-block:0 64px;}
+
+  /* header */
+  header.top{border-bottom:1px solid var(--line);background:var(--paper);}
+  .top-inner{max-width:1000px;margin:0 auto;padding-inline:20px;padding-block:40px 30px;}
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;margin:0 0 10px;
+  }
+  h1{
+    font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0 0 14px;
+    letter-spacing:-.02em;font-weight:700;text-wrap:balance;
+  }
+  .lede{font-size:17px;color:var(--ink-2);max-width:62ch;margin:0;}
+  .src{
+    margin-top:22px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    font-family:var(--mono);font-size:11.5px;color:var(--ink-3);
+  }
+  .src code{background:var(--paper-2);border:1px solid var(--line);padding:3px 8px;border-radius:4px;color:var(--ink-2);}
+
+  h2{
+    font-size:24px;margin:52px 0 6px;letter-spacing:-.01em;font-weight:700;
+    padding-top:20px;border-top:1px solid var(--line);text-wrap:balance;
+  }
+  h2:first-of-type{border-top:0;padding-top:0;}
+  h2 .num{font-family:var(--mono);font-size:13px;color:var(--ink-3);font-weight:500;margin-right:10px;}
+  .sub{color:var(--ink-2);margin:0 0 22px;max-width:66ch;}
+  h3{font-size:16px;margin:28px 0 8px;font-weight:600;letter-spacing:-.005em;}
+  p{max-width:66ch;}
+
+  /* finding callout */
+  .finding{
+    background:var(--accent-soft);border-left:3px solid var(--accent);
+    border-radius:0 var(--radius) var(--radius) 0;padding:14px 18px;margin:20px 0;
+  }
+  .finding p{margin:0;font-size:14.5px;color:var(--ink-2);max-width:none;}
+  .finding strong{color:var(--ink);}
+  .finding.warn{background:color-mix(in srgb,var(--warn) 10%,transparent);border-left-color:var(--warn);}
+
+  /* entity table */
+  .scroll{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper);}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px;}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line-2);vertical-align:top;}
+  th{
+    background:var(--paper-2);font-family:var(--mono);font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600;
+    position:sticky;top:0;
+  }
+  tbody tr:last-child td{border-bottom:0;}
+  td code,.mono{font-family:var(--mono);font-size:12.5px;}
+  td code{background:var(--paper-2);padding:1px 5px;border-radius:3px;color:var(--accent);}
+  .num-cell{font-variant-numeric:tabular-nums;text-align:right;}
+
+  /* tags */
+  .tag{
+    display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:3px;
+    background:var(--paper-2);color:var(--ink-2);border:1px solid var(--line);
+  }
+  .tag.core{background:color-mix(in srgb,var(--core) 14%,transparent);color:var(--core);border-color:transparent;}
+  .tag.support{background:color-mix(in srgb,var(--support) 14%,transparent);color:var(--support);border-color:transparent;}
+  .tag.ops{background:color-mix(in srgb,var(--ops) 14%,transparent);color:var(--ops);border-color:transparent;}
+  .tag.p1{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok);border-color:transparent;}
+  .tag.p2{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn);border-color:transparent;}
+  .tag.p3{background:var(--paper-2);color:var(--ink-3);}
+
+  /* diagram */
+  figure{margin:22px 0;}
+  figure svg{display:block;width:100%;height:auto;max-width:100%;}
+  figcaption{font-size:12.5px;color:var(--ink-3);margin-top:8px;font-family:var(--mono);}
+
+  /* code */
+  pre{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;
+    margin:14px 0;color:var(--ink-2);
+  }
+  pre b{color:var(--accent);font-weight:600;}
+  pre i{color:var(--ink-3);font-style:normal;}
+  pre em{color:var(--ok);font-style:normal;}
+
+  /* stack cards */
+  .stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:18px 0;}
+  .pick{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;box-shadow:var(--shadow);}
+  .pick .role{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-3);font-weight:600;}
+  .pick .name{font-size:16px;font-weight:700;margin:3px 0 6px;letter-spacing:-.01em;}
+  .pick .why{font-size:13.5px;color:var(--ink-2);margin:0;}
+  .pick .alt{font-size:12px;color:var(--ink-3);margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line);}
+
+  /* phases */
+  ol.phases{list-style:none;counter-reset:ph;padding:0;margin:18px 0;}
+  ol.phases > li{
+    counter-increment:ph;position:relative;padding:0 0 22px 46px;
+    border-left:2px solid var(--line);margin-left:15px;
+  }
+  ol.phases > li:last-child{border-left-color:transparent;padding-bottom:0;}
+  ol.phases > li::before{
+    content:counter(ph);position:absolute;left:-16px;top:-2px;
+    width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;
+    display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:600;
+  }
+  ol.phases h3{margin:2px 0 5px;}
+  ol.phases p{margin:0 0 6px;font-size:14px;color:var(--ink-2);}
+  .ships{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);}
+
+  ul.plain{padding-left:20px;margin:10px 0;}
+  ul.plain li{margin-bottom:6px;color:var(--ink-2);max-width:64ch;}
+  ul.plain li strong{color:var(--ink);}
+
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-3);font-size:12.5px;}
+
+  @media (max-width:560px){
+    .top-inner{padding-block:30px 24px;}
+    h2{font-size:20px;margin-top:40px;}
+    body{font-size:14.5px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <p class="eyebrow">Architecture blueprint · reverse-engineered from a live tenant</p>
+    <h1>Building a CRM on the Bitrix24 Model</h1>
+    <p class="lede">A data model, technology stack, and build sequence derived from the actual field schema of a running Bitrix24 instance — 280 fields across 6 entities, pulled from the system's own API rather than from documentation.</p>
+    <div class="src">
+      <code>b24-glmtze.bitrix24.com</code>
+      <span>·</span>
+      <code>crm.item.fields</code>
+      <span>·</span>
+      <span>inspected 21 Sep 2026</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2><span class="num">01</span>What the live system actually contains</h2>
+  <p class="sub">Rather than guess from the UI, I queried the tenant's internal AJAX controller for its authoritative field definitions. Here is what came back.</p>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Entity</th><th>Type ID</th><th class="num-cell">Fields</th><th>Role</th><th>Notes from this tenant</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Lead</code></td><td class="mono">1</td><td class="num-cell">52</td><td><span class="tag core">Core</span></td><td>Plan-locked in UI, schema still live</td></tr>
+        <tr><td><code>Deal</code></td><td class="mono">2</td><td class="num-cell">55</td><td><span class="tag core">Core</span></td><td>Largest entity; 1 pipeline, 5 stages</td></tr>
+        <tr><td><code>Contact</code></td><td class="mono">3</td><td class="num-cell">45</td><td><span class="tag core">Core</span></td><td>Accessible; grid + mass actions</td></tr>
+        <tr><td><code>Company</code></td><td class="mono">4</td><td class="num-cell">42</td><td><span class="tag core">Core</span></td><td>Carries <code>isMyCompany</code> self-reference</td></tr>
+        <tr><td><code>Quote</code></td><td class="mono">7</td><td class="num-cell">45</td><td><span class="tag support">Support</span></td><td>Own stage machine, links to Deal</td></tr>
+        <tr><td><code>SmartInvoice</code></td><td class="mono">31</td><td class="num-cell">41</td><td><span class="tag support">Support</span></td><td>Generic item; pipeline id 10</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="finding">
+    <p><strong>The decisive finding.</strong> All six entities share roughly 30 identical fields — <code>assignedById</code>, <code>createdTime</code>, <code>stageId</code>, <code>opportunity</code>, <code>currencyId</code>, the five UTM fields, and the four <code>lastCommunication*</code> timestamps. Bitrix24 is not six separate tables. It is <em>one</em> item abstraction with per-type field sets layered on top. That single observation should drive your entire schema design.</p>
+  </div>
+
+  <h3>The Default pipeline, as configured</h3>
+  <p>Five stages, read from the live kanban DOM with their exact colors, plus two terminal semantics:</p>
+  <figure>
+    <svg viewBox="0 0 880 150" role="img" aria-label="Pipeline: New, Create papers, Invoice, In progress, Final invoice, then Won or Lost">
+      <g font-family="IBM Plex Sans, sans-serif" font-size="13">
+        <rect x="6" y="28" width="150" height="40" rx="5" fill="#39a8ef"/>
+        <text x="81" y="53" fill="#fff" text-anchor="middle" font-weight="600">New</text>
+        <rect x="166" y="28" width="150" height="40" rx="5" fill="#2fc6f6"/>
+        <text x="241" y="53" fill="#fff" text-anchor="middle" font-weight="600">Create papers</text>
+        <rect x="326" y="28" width="150" height="40" rx="5" fill="#55d0e0"/>
+        <text x="401" y="53" fill="#fff" text-anchor="middle" font-weight="600">Invoice</text>
+        <rect x="486" y="28" width="150" height="40" rx="5" fill="#47e4c2"/>
+        <text x="561" y="53" fill="#0d3b34" text-anchor="middle" font-weight="600">In progress</text>
+        <rect x="646" y="28" width="150" height="40" rx="5" fill="#ffa900"/>
+        <text x="721" y="53" fill="#4a3000" text-anchor="middle" font-weight="600">Final invoice</text>
+
+        <path d="M806 48 L846 48" stroke="#7c8395" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>
+        <rect x="646" y="94" width="72" height="32" rx="5" fill="#3bc864"/>
+        <text x="682" y="115" fill="#fff" text-anchor="middle" font-weight="600" font-size="12">Won</text>
+        <rect x="724" y="94" width="72" height="32" rx="5" fill="#f1361d"/>
+        <text x="760" y="115" fill="#fff" text-anchor="middle" font-weight="600" font-size="12">Lost</text>
+        <path d="M721 72 L721 90" stroke="#7c8395" stroke-width="1.5" fill="none"/>
+        <path d="M760 72 L760 90" stroke="#7c8395" stroke-width="1.5" fill="none"/>
+
+        <text x="6" y="16" fill="#7c8395" font-size="10.5" font-family="IBM Plex Mono, monospace" letter-spacing="0.08em">SEMANTIC: PROCESS</text>
+        <text x="646" y="88" fill="#7c8395" font-size="10.5" font-family="IBM Plex Mono, monospace" letter-spacing="0.08em">TERMINAL</text>
+      </g>
+    </svg>
+    <figcaption>Stage colors taken from the live DOM. Every stage carries a semantic — process, success, or failure.</figcaption>
+  </figure>
+
+  <p>Model the semantic as a separate column from the stage itself. Reports ask "how much did we win last quarter" far more often than they ask about a specific named stage, and stage names change while semantics do not.</p>
+
+  <h2><span class="num">02</span>The type system to replicate</h2>
+  <p class="sub">Across 280 fields, Bitrix24 uses exactly 21 distinct field types. This is the vocabulary your schema must express.</p>
+
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Bitrix type</th><th class="num-cell">Uses</th><th>Postgres equivalent</th><th>Build note</th></tr></thead>
+      <tbody>
+        <tr><td><code>string</code></td><td class="num-cell">61</td><td class="mono">text</td><td>Don't pre-size varchar</td></tr>
+        <tr><td><code>datetime</code></td><td class="num-cell">46</td><td class="mono">timestamptz</td><td>Always tz-aware</td></tr>
+        <tr><td><code>user</code></td><td class="num-cell">32</td><td class="mono">bigint → users</td><td>Ownership + audit</td></tr>
+        <tr><td><code>boolean</code></td><td class="num-cell">28</td><td class="mono">boolean</td><td>Default false, not null</td></tr>
+        <tr><td><code>crm_status</code></td><td class="num-cell">17</td><td class="mono">bigint → status_ref</td><td>User-editable dictionary</td></tr>
+        <tr><td><code>text</code></td><td class="num-cell">14</td><td class="mono">text</td><td>Rich body</td></tr>
+        <tr><td><code>crm_contact</code></td><td class="num-cell">14</td><td class="mono">FK / join table</td><td>Both single and multi</td></tr>
+        <tr><td><code>integer</code></td><td class="num-cell">12</td><td class="mono">bigint</td><td></td></tr>
+        <tr><td><code>crm_company</code></td><td class="num-cell">10</td><td class="mono">FK</td><td></td></tr>
+        <tr><td><code>date</code></td><td class="num-cell">9</td><td class="mono">date</td><td>No time component</td></tr>
+        <tr><td><code>double</code></td><td class="num-cell">8</td><td class="mono">numeric(18,2)</td><td><strong>Never float</strong></td></tr>
+        <tr><td><code>crm_currency</code></td><td class="num-cell">5</td><td class="mono">char(3)</td><td>ISO 4217</td></tr>
+        <tr><td><code>crm_category</code></td><td class="num-cell">4</td><td class="mono">FK → pipelines</td><td></td></tr>
+        <tr><td><code>crm_lead</code>, <code>crm_deal</code>, <code>crm_quote</code>, <code>crm_entity</code></td><td class="num-cell">8</td><td class="mono">polymorphic FK</td><td>Type id + row id</td></tr>
+        <tr><td><code>crm_multifield</code></td><td class="num-cell">3</td><td class="mono">child table</td><td>Phone/email/IM sets</td></tr>
+        <tr><td><code>crm_webform</code></td><td class="num-cell">4</td><td class="mono">FK</td><td>Attribution</td></tr>
+        <tr><td><code>location</code></td><td class="num-cell">3</td><td class="mono">jsonb</td><td>Structured address</td></tr>
+        <tr><td><code>file</code></td><td class="num-cell">2</td><td class="mono">FK → files</td><td>Object storage key</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="finding warn">
+    <p><strong>Note the <code>double</code> row.</strong> Bitrix24 declares money as <code>double</code> — a floating-point type. Do not copy this. Floating point cannot represent 0.10 exactly, and repeated addition across a pipeline drifts. Use <code>numeric(18,2)</code>, or store integer minor units. This is one of the few places where the reference implementation is worth deliberately diverging from.</p>
+  </div>
+
+  <h3>The multifield pattern</h3>
+  <p>A contact has several phone numbers, each with a label (work, mobile, fax), each possibly the primary. Bitrix24 calls this <code>crm_multifield</code> and stores it as a child table rather than as columns. Copy this exactly — every CRM that starts with <code>phone1</code>, <code>phone2</code>, <code>phone3</code> eventually regrets it.</p>
+
+<pre><b>CREATE TABLE</b> multifield (
+  id          <em>bigserial</em> <b>PRIMARY KEY</b>,
+  entity_type <em>smallint</em>  <b>NOT NULL</b>,   <i>-- 1 lead, 2 deal, 3 contact…</i>
+  entity_id   <em>bigint</em>    <b>NOT NULL</b>,
+  kind        <em>text</em>      <b>NOT NULL</b>,   <i>-- PHONE | EMAIL | IM | WEB</i>
+  value_type  <em>text</em>      <b>NOT NULL</b>,   <i>-- WORK | MOBILE | HOME | FAX</i>
+  value       <em>text</em>      <b>NOT NULL</b>,
+  is_primary  <em>boolean</em>   <b>NOT NULL DEFAULT</b> false,
+  sort        <em>int</em>       <b>NOT NULL DEFAULT</b> 100
+);
+<b>CREATE INDEX</b> ON multifield (entity_type, entity_id);
+<b>CREATE INDEX</b> ON multifield (kind, value);  <i>-- dedupe + inbound call lookup</i></pre>
+
+  <p>That second index is what makes "an unknown number is calling — who is this?" resolve in milliseconds. Inbound identification is a core CRM behavior, not an afterthought.</p>
+
+  <h2><span class="num">03</span>Data model</h2>
+  <p class="sub">The shared-core observation from section 01, turned into tables.</p>
+
+  <figure>
+    <svg viewBox="0 0 880 400" role="img" aria-label="Entity relationship diagram showing crm_item core with satellite tables">
+      <g font-family="IBM Plex Mono, monospace" font-size="11">
+        <!-- core -->
+        <rect x="320" y="20" width="240" height="84" rx="7" fill="#2f6df6"/>
+        <text x="440" y="44" fill="#fff" text-anchor="middle" font-size="14" font-weight="600" font-family="IBM Plex Sans, sans-serif">crm_item</text>
+        <text x="440" y="63" fill="#dbe7ff" text-anchor="middle" font-size="10.5">entity_type_id + id</text>
+        <text x="440" y="79" fill="#dbe7ff" text-anchor="middle" font-size="10.5">~30 shared columns</text>
+        <text x="440" y="95" fill="#dbe7ff" text-anchor="middle" font-size="10.5">owner · stage · money · audit</text>
+
+        <!-- satellites -->
+        <rect x="20" y="170" width="150" height="56" rx="6" fill="none" stroke="#6b54d3" stroke-width="1.6"/>
+        <text x="95" y="192" fill="#6b54d3" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">multifield</text>
+        <text x="95" y="210" fill="#7c8395" text-anchor="middle" font-size="10">phone · email · im</text>
+
+        <rect x="190" y="170" width="150" height="56" rx="6" fill="none" stroke="#6b54d3" stroke-width="1.6"/>
+        <text x="265" y="192" fill="#6b54d3" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">field_value</text>
+        <text x="265" y="210" fill="#7c8395" text-anchor="middle" font-size="10">custom fields (EAV)</text>
+
+        <rect x="360" y="170" width="160" height="56" rx="6" fill="none" stroke="#0f9b8e" stroke-width="1.6"/>
+        <text x="440" y="192" fill="#0f9b8e" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">activity</text>
+        <text x="440" y="210" fill="#7c8395" text-anchor="middle" font-size="10">call · task · meeting</text>
+
+        <rect x="540" y="170" width="150" height="56" rx="6" fill="none" stroke="#0f9b8e" stroke-width="1.6"/>
+        <text x="615" y="192" fill="#0f9b8e" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">timeline</text>
+        <text x="615" y="210" fill="#7c8395" text-anchor="middle" font-size="10">immutable history</text>
+
+        <rect x="710" y="170" width="150" height="56" rx="6" fill="none" stroke="#6b54d3" stroke-width="1.6"/>
+        <text x="785" y="192" fill="#6b54d3" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">binding</text>
+        <text x="785" y="210" fill="#7c8395" text-anchor="middle" font-size="10">item ↔ item (M:N)</text>
+
+        <!-- lines to core -->
+        <g stroke="#b6bdca" stroke-width="1.3" fill="none">
+          <path d="M95 168 L95 130 L330 130 L360 106"/>
+          <path d="M265 168 L265 132 L380 132 L410 106"/>
+          <path d="M440 168 L440 106"/>
+          <path d="M615 168 L615 132 L500 132 L470 106"/>
+          <path d="M785 168 L785 130 L550 130 L520 106"/>
+        </g>
+
+        <!-- config row -->
+        <rect x="150" y="286" width="160" height="52" rx="6" fill="none" stroke="#7c8395" stroke-width="1.3" stroke-dasharray="4 3"/>
+        <text x="230" y="307" fill="#4a5061" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">pipeline</text>
+        <text x="230" y="324" fill="#7c8395" text-anchor="middle" font-size="10">per entity type</text>
+
+        <rect x="330" y="286" width="160" height="52" rx="6" fill="none" stroke="#7c8395" stroke-width="1.3" stroke-dasharray="4 3"/>
+        <text x="410" y="307" fill="#4a5061" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">stage</text>
+        <text x="410" y="324" fill="#7c8395" text-anchor="middle" font-size="10">name · color · semantic</text>
+
+        <rect x="510" y="286" width="160" height="52" rx="6" fill="none" stroke="#7c8395" stroke-width="1.3" stroke-dasharray="4 3"/>
+        <text x="590" y="307" fill="#4a5061" text-anchor="middle" font-weight="600" font-family="IBM Plex Sans, sans-serif" font-size="12.5">status_ref</text>
+        <text x="590" y="324" fill="#7c8395" text-anchor="middle" font-size="10">source · type · industry</text>
+
+        <g stroke="#b6bdca" stroke-width="1.2" fill="none" stroke-dasharray="4 3">
+          <path d="M230 284 L230 250 L410 250"/>
+          <path d="M410 284 L410 250"/>
+          <path d="M590 284 L590 250 L410 250"/>
+        </g>
+        <path d="M410 250 L410 232" stroke="#b6bdca" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+        <text x="418" y="246" fill="#7c8395" font-size="9.5">configuration</text>
+      </g>
+    </svg>
+    <figcaption>One core table, satellites for repeating data, dashed boxes for tenant configuration.</figcaption>
+  </figure>
+
+  <h3>Why one core table, not six</h3>
+  <p>Six near-identical tables means every feature — assignment, stage movement, search, permissions, audit, timeline — gets written six times and drifts. A shared core writes each once. The cost is that the core table grows wide and holds columns irrelevant to some types (<code>probability</code> means nothing on a Contact). That trade is worth taking, and it is the trade Bitrix24 itself made.</p>
+
+  <p>Two viable shapes:</p>
+  <ul class="plain">
+    <li><strong>Single table with a type discriminator.</strong> Simplest joins, simplest permissions. Nullable columns for type-specific fields. Start here.</li>
+    <li><strong>Core table plus per-type extension tables.</strong> Cleaner nullability, one extra join on every read. Worth it past roughly 60 type-specific columns.</li>
+  </ul>
+
+<pre><b>CREATE TABLE</b> crm_item (
+  id              <em>bigserial</em>,
+  entity_type_id  <em>smallint</em>    <b>NOT NULL</b>,
+  tenant_id       <em>bigint</em>      <b>NOT NULL</b>,
+  title           <em>text</em>,
+  <i>-- pipeline position</i>
+  pipeline_id     <em>bigint</em>      <b>REFERENCES</b> pipeline,
+  stage_id        <em>bigint</em>      <b>REFERENCES</b> stage,
+  stage_semantic  <em>text</em>        <b>NOT NULL DEFAULT</b> 'process',
+  <i>-- money</i>
+  amount          <em>numeric(18,2)</em> <b>NOT NULL DEFAULT</b> 0,
+  currency_id     <em>char(3)</em>     <b>NOT NULL DEFAULT</b> 'USD',
+  amount_base     <em>numeric(18,2)</em>,  <i>-- converted, for cross-currency rollups</i>
+  is_manual_amount <em>boolean</em>    <b>NOT NULL DEFAULT</b> false,
+  <i>-- ownership &amp; access</i>
+  assigned_by_id  <em>bigint</em>      <b>NOT NULL REFERENCES</b> users,
+  is_open         <em>boolean</em>     <b>NOT NULL DEFAULT</b> true,
+  <i>-- audit (present on every Bitrix entity)</i>
+  created_by      <em>bigint</em>      <b>NOT NULL</b>,
+  created_at      <em>timestamptz</em> <b>NOT NULL DEFAULT</b> now(),
+  updated_by      <em>bigint</em>,
+  updated_at      <em>timestamptz</em> <b>NOT NULL DEFAULT</b> now(),
+  moved_by        <em>bigint</em>,
+  moved_at        <em>timestamptz</em>,
+  <i>-- denormalized for list sorting; Bitrix does exactly this</i>
+  last_activity_at   <em>timestamptz</em>,
+  last_comm_call_at  <em>timestamptz</em>,
+  last_comm_email_at <em>timestamptz</em>,
+  <i>-- attribution</i>
+  source_id       <em>bigint</em>      <b>REFERENCES</b> status_ref,
+  utm             <em>jsonb</em>,      <i>-- 5 UTM fields collapse to one column</i>
+
+  <b>PRIMARY KEY</b> (entity_type_id, id)
+);
+
+<i>-- the index every kanban query needs</i>
+<b>CREATE INDEX</b> ON crm_item
+  (tenant_id, entity_type_id, pipeline_id, stage_id)
+  <b>INCLUDE</b> (amount, assigned_by_id)
+  <b>WHERE</b> deleted_at <b>IS NULL</b>;</pre>
+
+  <div class="finding">
+    <p><strong>On the five UTM columns.</strong> Bitrix24 stores <code>utmSource</code>, <code>utmMedium</code>, <code>utmCampaign</code>, <code>utmContent</code>, <code>utmTerm</code> as five separate columns on every entity — 25 columns across the model that are almost always null. Collapse them into one <code>jsonb</code>. You keep queryability through a GIN index and lose nothing.</p>
+  </div>
+
+  <h3>Custom fields</h3>
+  <p>Bitrix24 lets users define their own fields at runtime, which rules out a fixed schema. Two workable approaches, and the choice matters:</p>
+
+  <div class="stack">
+    <div class="pick">
+      <div class="role">Option A</div>
+      <div class="name">jsonb column</div>
+      <p class="why">One <code>custom jsonb</code> column on <code>crm_item</code>. GIN-indexed. No joins, trivially fast reads, flexible.</p>
+      <p class="alt">Weak per-field typing and constraints. <strong>Recommended</strong> — simpler, and Postgres jsonb is fast enough.</p>
+    </div>
+    <div class="pick">
+      <div class="role">Option B</div>
+      <div class="name">EAV table</div>
+      <p class="why"><code>field_value(item, field_def, value)</code>. Proper per-field types, constraints, referential integrity.</p>
+      <p class="alt">One join per field queried. Painful for wide list views.</p>
+    </div>
+  </div>
+
+  <h3>Timeline and activity — keep them separate</h3>
+  <p>These look alike and are not. An <strong>activity</strong> is something scheduled that someone must do — it has a due date, an owner, and a completed flag, and it drives the "overdue" counters. A <strong>timeline entry</strong> is something that already happened — immutable, append-only, the audit record. Merging them produces a table that is both a work queue and a log and is bad at both.</p>
+
+  <h2><span class="num">04</span>Technology stack</h2>
+  <p class="sub">Choices with reasons. The load pattern here is read-heavy, relational, with real-time board updates and heavy filtering.</p>
+
+  <div class="stack">
+    <div class="pick">
+      <div class="role">Database</div>
+      <div class="name">PostgreSQL 16</div>
+      <p class="why">Relational integrity for the entity graph, plus <code>jsonb</code> for custom fields and UTM — you need both, and Postgres is the one engine that does both well. Row-level security maps cleanly onto CRM permissions.</p>
+      <p class="alt">Not MongoDB: a CRM is a graph of related records, and you will join constantly.</p>
+    </div>
+    <div class="pick">
+      <div class="role">Backend</div>
+      <div class="name">NestJS + TypeScript</div>
+      <p class="why">The shared-core model needs strong typing to stay safe across entity types. Module structure mirrors CRM domains naturally.</p>
+      <p class="alt">Go/Rust if the team knows them — faster, but slower to build this shape.</p>
+    </div>
+    <div class="pick">
+      <div class="role">ORM</div>
+      <div class="name">Drizzle</div>
+      <p class="why">SQL-first, so the deliberate index work above survives contact with the ORM. Typed results without a query-builder abstraction fighting you.</p>
+      <p class="alt">Prisma is friendlier; it obscures query plans you will need to tune.</p>
+    </div>
+    <div class="pick">
+      <div class="role">Frontend</div>
+      <div class="name">React + TanStack Query</div>
+      <p class="why">The board is a cache-coherency problem, not a rendering problem. TanStack Query's optimistic updates are exactly the drag-and-drop pattern.</p>
+      <p class="alt">Svelte/Vue equally fine; the data layer choice matters more.</p>
+    </div>
+    <div class="pick">
+      <div class="role">Drag &amp; drop</div>
+      <div class="name">dnd-kit</div>
+      <p class="why">Accessible by default — keyboard and screen reader support that react-beautiful-dnd (now unmaintained) lacks.</p>
+      <p class="alt">Native HTML5 DnD for a simple board; it degrades badly on touch.</p>
+    </div>
+    <div class="pick">
+      <div class="role">Search</div>
+      <div class="name">Postgres FTS → Meilisearch</div>
+      <p class="why">Start with <code>tsvector</code>; it carries you to ~1M records. Move to Meilisearch when typo tolerance and faceting start to matter.</p>
+      <p class="alt">Elasticsearch is heavier than this workload needs.</p>
+    </div>
+    <div class="pick">
+      <div class="role">Realtime</div>
+      <div class="name">Centrifugo</div>
+      <p class="why">Bitrix24 pushes live board updates ("server connection established" in its own UI). Centrifugo handles fan-out without coupling it to your app servers.</p>
+      <p class="alt">Plain WebSockets work until you run more than one backend instance.</p>
+    </div>
+    <div class="pick">
+      <div class="role">Jobs &amp; automation</div>
+      <div class="name">BullMQ + Redis</div>
+      <p class="why">Automation rules are delayed, retryable jobs. Also covers email send, import, and rollup recalculation.</p>
+      <p class="alt">pg-boss if you want to avoid adding Redis.</p>
+    </div>
+  </div>
+
+  <h3>The automation engine</h3>
+  <p>Bitrix24's automation rules fire on stage entry. Model a rule as <code>(trigger, condition, action)</code> and keep execution in the queue, never inline in the HTTP request — a rule that sends email must not make the drag feel slow, and it must survive a failed send.</p>
+
+<pre><i>// stage change emits; the rule engine consumes</i>
+<b>await</b> tx.insert(timeline).values({ itemId, type: <em>'stage_changed'</em>, from, to });
+<b>await</b> queue.add(<em>'automation'</em>, { itemId, trigger: <em>'stage_entered'</em>, stageId: to },
+  { attempts: 3, backoff: { type: <em>'exponential'</em>, delay: 2000 } });</pre>
+
+  <h2><span class="num">05</span>Permissions — decide this before you build</h2>
+  <p class="sub">Every entity in the schema carries <code>assignedById</code>, <code>opened</code>, and <code>observers</code>. Those three columns are a full access model, and retrofitting one later means rewriting every query in the system.</p>
+
+  <ul class="plain">
+    <li><strong><code>assigned_by_id</code></strong> — the owner. The baseline "my records" filter.</li>
+    <li><strong><code>is_open</code></strong> — visible to everyone, regardless of owner. Note it is the one field Bitrix marks <em>required</em> on all six entities.</li>
+    <li><strong><code>observers</code></strong> — extra users with read access. A join table.</li>
+    <li><strong>Department hierarchy</strong> — managers see subordinates' records, transitively.</li>
+  </ul>
+
+  <p>Implement as a predicate appended to every list query, ideally via Postgres row-level security so it cannot be forgotten at a call site:</p>
+
+<pre><b>CREATE POLICY</b> item_read <b>ON</b> crm_item <b>FOR SELECT USING</b> (
+  tenant_id = current_tenant()
+  <b>AND</b> (
+    is_open
+    <b>OR</b> assigned_by_id = current_user_id()
+    <b>OR</b> assigned_by_id = <b>ANY</b>(subordinate_ids(current_user_id()))
+    <b>OR</b> <b>EXISTS</b> (<b>SELECT</b> 1 <b>FROM</b> observer o
+                <b>WHERE</b> o.item_id = crm_item.id <b>AND</b> o.user_id = current_user_id())
+  )
+);</pre>
+
+  <h2><span class="num">06</span>Build sequence</h2>
+  <p class="sub">Ordered so each phase is usable on its own, and so the expensive-to-change decisions land first.</p>
+
+  <ol class="phases">
+    <li>
+      <h3>Foundation <span class="tag p1">Must</span></h3>
+      <p>Tenancy, users, departments, auth. The <code>crm_item</code> core with Contact and Company only. Multifield table. Row-level security from the first query — not bolted on later.</p>
+      <p class="ships">Ships: working contact database with search and permissions</p>
+    </li>
+    <li>
+      <h3>Deals and the board <span class="tag p1">Must</span></h3>
+      <p>Pipelines, stages, semantics. Kanban with optimistic drag-and-drop. Stage-change events written to timeline. Per-stage rollups.</p>
+      <p class="ships">Ships: the screen this blueprint started from</p>
+    </li>
+    <li>
+      <h3>Timeline and activities <span class="tag p1">Must</span></h3>
+      <p>Append-only timeline. Scheduled activities with due dates driving overdue counters. Comments. This is where a CRM stops being a spreadsheet.</p>
+      <p class="ships">Ships: history and follow-up</p>
+    </li>
+    <li>
+      <h3>Custom fields <span class="tag p2">Should</span></h3>
+      <p>Field definitions per entity type, <code>jsonb</code> storage, dynamic form rendering, filter integration. Deferring past this point means migrating live data.</p>
+      <p class="ships">Ships: tenant-specific configuration</p>
+    </li>
+    <li>
+      <h3>Quotes and invoices <span class="tag p2">Should</span></h3>
+      <p>Line items, tax, totals, PDF generation, payment status. New entity types on the existing core — this phase proves the core abstraction was right.</p>
+      <p class="ships">Ships: quote-to-cash</p>
+    </li>
+    <li>
+      <h3>Automation <span class="tag p2">Should</span></h3>
+      <p>Trigger/condition/action rules on stage entry. Queue-backed. Start with three actions — assign, notify, create activity — before building a visual editor.</p>
+      <p class="ships">Ships: the pipeline runs itself</p>
+    </li>
+    <li>
+      <h3>Communications <span class="tag p3">Later</span></h3>
+      <p>Email sync, telephony, inbound number resolution via the multifield index. Each channel is a genuine integration project; do not underestimate these.</p>
+      <p class="ships">Ships: contact center</p>
+    </li>
+    <li>
+      <h3>Reporting <span class="tag p3">Later</span></h3>
+      <p>Funnel conversion, win rate, forecast, activity volume. Read replica or a rollup table — never run analytics against the live board's tables.</p>
+      <p class="ships">Ships: management view</p>
+    </li>
+  </ol>
+
+  <h2><span class="num">07</span>What to do differently</h2>
+  <p class="sub">Five places where copying Bitrix24 exactly would be a mistake.</p>
+
+  <ul class="plain">
+    <li><strong>Money as <code>numeric</code>, not <code>double</code>.</strong> The single clearest flaw in the reference schema.</li>
+    <li><strong>UTM as one <code>jsonb</code>, not five columns per entity.</strong> Removes 25 mostly-null columns.</li>
+    <li><strong>Decide Leads early.</strong> Bitrix24 supports both a lead-first and a lead-free flow, and that flexibility costs real complexity. If your process does not need a separate qualification stage, skip the Lead entity entirely — it is 52 fields and an entire conversion pathway.</li>
+    <li><strong>Don't build the visual automation editor first.</strong> Three hardcoded rule types cover most real usage; the editor is months of work serving the last 10%.</li>
+    <li><strong>Ship one pipeline before making pipelines configurable.</strong> The data model should support many from day one; the UI does not have to.</li>
+  </ul>
+
+  <div class="finding">
+    <p><strong>Scope reality.</strong> What is mapped here — phases 1 through 6 — is the CRM core, and it is a substantial build. The full Bitrix24 surface also includes Tasks, Booking, Inventory, Marketing, Sites, BI Builder, e-Signature, Knowledge Base, and a telephony contact center. Each is its own product. Treat this blueprint as the CRM, not as the suite.</p>
+  </div>
+
+  <footer>
+    Schema figures read from <span class="mono">crm.item.fields</span> on the live tenant, 21 Sep 2026. Stage names and colors read from the kanban DOM. Lead, Quote and several modules were plan-locked in that tenant's UI; their schemas were still returned by the API and are included above.
+  </footer>
+</div>

@@ -1,0 +1,50 @@
+<div class="page">
+  <header class="page-head">
+    <h1>Contacts</h1>
+    <div class="tools">
+      <input
+        type="search"
+        placeholder="Search name, email, phone…"
+        [(ngModel)]="search"
+        (keyup.enter)="onSearch()" />
+      <button class="btn" (click)="onSearch()">Search</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Loading…</p>
+  } @else if (error()) {
+    <p class="state error">{{ error() }}</p>
+  } @else if (contacts().length === 0) {
+    <p class="state">No contacts found.</p>
+  } @else {
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Phone</th><th>Company</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of contacts(); track c.id) {
+          <tr>
+            <td><a [routerLink]="['/contacts', c.id]">{{ c.fullName }}</a></td>
+            <td>{{ c.email || '—' }}</td>
+            <td>{{ c.phone || '—' }}</td>
+            <td>{{ c.companyName || '—' }}</td>
+            <td class="row-actions">
+              <button class="link danger" (click)="remove(c)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer class="pager">
+      <span>{{ totalCount() }} contacts · page {{ page() }} / {{ totalPages() }}</span>
+      <div class="pager-btns">
+        <button class="btn" [disabled]="page() === 1" (click)="prev()">Prev</button>
+        <button class="btn" [disabled]="page() >= totalPages()" (click)="next()">Next</button>
+      </div>
+    </footer>
+  }
+</div>

@@ -1,0 +1,20 @@
+.page { padding: 24px; }
+h1 { margin: 0 0 20px; font-size: 24px; }
+
+.tiles {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;
+}
+.tile {
+  display: flex; flex-direction: column; gap: 8px;
+  background: #fff; border: 1px solid #eceef1; border-radius: 10px;
+  padding: 20px; text-decoration: none; color: inherit;
+}
+a.tile:hover { border-color: #2f6df6; }
+.tile .k { font-size: 13px; color: #667085; }
+.tile .v { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile.accent { background: #2f6df6; border-color: #2f6df6; color: #fff; }
+.tile.accent .k { color: #dbe7ff; }
+.tile.success .v { color: #15803d; }
+
+.state { padding: 32px 0; color: #667085; }
+.state.error { color: #dc2626; }
