@@ -1,40 +1,40 @@
 @if (_sync(); as k) {
   @if (config(); as c) {
-    <div class="backdrop" (click)="close()">
+    <div class="overlay" (click)="close()">
       <div class="modal" (click)="$event.stopPropagation()" role="dialog" [attr.aria-label]="c.title">
         <header class="modal-head">
           <h3>{{ c.title }}</h3>
-          <button class="x" type="button" (click)="close()" aria-label="Close">×</button>
+          <button class="modal-x" type="button" (click)="close()" aria-label="Close">×</button>
         </header>
 
         <div class="modal-body">
           @if (c.needsRecipient) {
             <label>
-              <span>{{ c.recipientLabel }}</span>
-              <input type="text" [(ngModel)]="recipient" name="recipient" />
+              <span class="label">{{ c.recipientLabel }}</span>
+              <input class="input" type="text" [(ngModel)]="recipient" name="recipient" />
             </label>
           }
 
           @if (c.needsSubject) {
             <label>
-              <span>Subject</span>
-              <input type="text" [(ngModel)]="subject" name="subject" />
+              <span class="label">Subject</span>
+              <input class="input" type="text" [(ngModel)]="subject" name="subject" />
             </label>
           }
 
           <label>
-            <span>{{ c.bodyLabel }}</span>
-            <textarea rows="4" [(ngModel)]="body" name="body"></textarea>
+            <span class="label">{{ c.bodyLabel }}</span>
+            <textarea class="textarea" rows="4" [(ngModel)]="body" name="body"></textarea>
           </label>
 
           @if (error()) {
-            <p class="err">{{ error() }}</p>
+            <p class="note note-error">{{ error() }}</p>
           }
         </div>
 
         <footer class="modal-foot">
           <button class="btn" type="button" (click)="close()">Cancel</button>
-          <button class="btn primary" type="button"
+          <button class="btn btn-primary" type="button"
                   [disabled]="invalid || busy()" (click)="submit()">
             {{ busy() ? 'Working…' : c.cta }}
           </button>

@@ -1,58 +1,111 @@
-.tl-empty { color: var(--text-muted); padding: 24px 0; }
+:host { display: block; }
 
-.tl { display: flex; flex-direction: column; gap: 24px; }
+.tl-empty { margin: 0; color: var(--c-text-3); font-size: 13px; }
 
-.tl-group { display: flex; flex-direction: column; gap: 4px; }
+.tl { display: flex; flex-direction: column; gap: var(--s-5); }
+
+/* ---------- day header ---------- */
 .tl-date {
-  display: flex; align-items: center; gap: 8px;
-  position: sticky; top: 0; background: #fff; padding: 4px 0; z-index: 1;
+  display: flex; align-items: center; gap: var(--s-2);
+  margin-bottom: var(--s-3);
 }
-.tl-date-label { font-size: 13px; font-weight: 700; color: var(--text); }
+.tl-date-label { font-size: 12px; font-weight: 600; }
 .tl-date-count {
-  font-size: 11px; color: var(--text-muted); background: var(--bg-hover);
-  border-radius: 10px; padding: 1px 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 999px;
+  background: var(--c-subtle);
+  color: var(--c-text-3); font-size: 11px;
 }
 
+/* ---------- items ---------- */
 .tl-list { list-style: none; margin: 0; padding: 0; }
+
 .tl-item {
-  position: relative; display: grid; grid-template-columns: 32px 1fr; gap: 12px;
-  padding: 0 0 18px 0;
+  position: relative;
+  display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: var(--s-3);
+  padding-bottom: var(--s-4);
 }
-/* vertical connector line */
 .tl-item::before {
-  content: ''; position: absolute; left: 15px; top: 32px; bottom: -4px;
-  width: 2px; background: var(--border);
+  content: ''; position: absolute; left: 12px; top: 30px; bottom: 0;
+  width: 1px; background: var(--c-border);
 }
+.tl-item:last-child { padding-bottom: 0; }
 .tl-item:last-child::before { display: none; }
 
 .tl-icon {
-  width: 32px; height: 32px; border-radius: 50%;
-  display: grid; place-items: center; color: #fff; z-index: 1;
+  display: grid; place-items: center;
+  width: 26px; height: 26px; flex: 0 0 auto;
+  border-radius: 50%;
+  color: #fff;
+  z-index: 1;
 }
-.tl-icon svg { width: 16px; height: 16px; }
+.tl-icon svg { width: 13px; height: 13px; }
 
-.tl-body { padding-top: 4px; }
-.tl-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.tl-title { font-size: 14px; color: var(--text); }
-.tl-chip {
-  font-size: 10px; text-transform: uppercase; letter-spacing: .05em;
-  background: var(--bg-hover); color: var(--text-muted); padding: 2px 8px; border-radius: 10px;
-}
-.tl-dir {
-  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
-  background: var(--accent-soft); color: var(--accent);
-}
-.tl-dir.in { background: #ecfdf5; color: var(--success); }
-.tl-done { font-size: 11px; color: var(--success); font-weight: 600; }
+.tl-body { min-width: 0; }
 
-.tl-detail { margin: 4px 0; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
-.tl-time { color: var(--text-subtle); font-size: 12px; }
-
-/* Tinted icon instead of a solid saturated circle. */
-.tl-icon {
-  width: 28px; height: 28px;
-  background: var(--bg-hover) !important;   /* base; the tint is layered below */
-  border: 1px solid var(--border);
-  position: relative;
+/* ---------- head row ---------- */
+.tl-head {
+  display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap;
+  min-height: 26px;
 }
-.tl-icon svg { width: 14px; height: 14px; color: var(--text-muted); }
+.tl-title { font-size: 13px; font-weight: 500; }
+
+.tl-chip, .tl-dir, .tl-done {
+  display: inline-flex; align-items: center;
+  height: 18px; padding: 0 7px;
+  border-radius: 999px;
+  font-size: 10.5px; font-weight: 500; white-space: nowrap;
+}
+.tl-chip { background: var(--c-subtle); color: var(--c-text-3); }
+.tl-dir  { background: #fffbeb; color: #b45309; }
+.tl-dir.in { background: #eff6ff; color: #1d4ed8; }
+.tl-done { background: #f0fdf4; color: #15803d; }
+
+.tl-detail {
+  margin: 3px 0 0;
+  color: var(--c-text-2); font-size: 12.5px; line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- foot row ---------- */
+.tl-foot {
+  display: flex; align-items: center; gap: var(--s-3);
+  margin-top: 4px;
+}
+.tl-time { color: var(--c-text-3); font-size: 11.5px; }
+
+.tl-actions {
+  display: flex; gap: var(--s-3);
+  opacity: 0; transition: opacity .12s ease;
+}
+.tl-item:hover .tl-actions,
+.tl-item:focus-within .tl-actions { opacity: 1; }
+
+.tl-act {
+  padding: 0; border: 0; background: none;
+  color: var(--c-text-3);
+  font: inherit; font-size: 11.5px;
+  cursor: pointer;
+}
+.tl-act:hover { color: var(--c-accent); }
+.tl-act--danger:hover { color: var(--c-danger); }
+.tl-act:disabled { opacity: .5; cursor: default; }
+
+/* ---------- inline edit ---------- */
+.tl-edit {
+  display: flex; align-items: center; gap: var(--s-2);
+  margin: 4px 0;
+}
+.tl-edit-input {
+  flex: 1; min-width: 0;
+  height: 28px; padding: 0 8px;
+  border: 1px solid var(--c-border-mid); border-radius: var(--r-2);
+  background: var(--c-surface);
+  color: var(--c-text); font: inherit; font-size: 12.5px;
+  outline: none;
+}
+.tl-edit-input:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-accent-bg);
+}

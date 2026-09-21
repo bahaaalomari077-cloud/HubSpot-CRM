@@ -1,66 +1,73 @@
 <div class="page">
   <header class="page-head">
     <h1>Companies</h1>
-    <div class="tools">
-      <input type="search" placeholder="Search name, industry, city…"
+    <span class="muted">{{ totalCount() }}</span>
+    <div class="page-tools">
+      <input class="input search" type="search" placeholder="Search name, industry, city…"
              [(ngModel)]="search" (keyup.enter)="onSearch()" />
       <button class="btn" (click)="onSearch()">Search</button>
-      <button class="btn primary" (click)="openCreate()">+ New company</button>
+      <button class="btn btn-primary" (click)="openCreate()">New company</button>
     </div>
   </header>
 
   @if (loading()) {
-    <p class="state">Loading…</p>
+    <p class="note">Loading…</p>
   } @else if (error()) {
-    <p class="state error">{{ error() }}</p>
+    <p class="note note-error">{{ error() }}</p>
   } @else if (companies().length === 0) {
-    <div class="state">
-      <p>No companies yet.</p>
-      <button class="btn primary" (click)="openCreate()">+ Add your first company</button>
+    <div class="card empty">
+      <p>No companies yet</p>
+      <button class="btn btn-primary" style="margin-top:12px" (click)="openCreate()">
+        Add your first company
+      </button>
     </div>
   } @else {
-    <table class="grid">
-      <thead>
-        <tr>
-          <th>Name</th><th>Industry</th><th>Contacts</th>
-          <th>City</th><th>Email</th><th>Phone</th><th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of companies(); track c.id) {
-          <tr [class.active-row]="(c.activeContacts ?? 0) > 0">
-            <td>
-              <a class="name" [routerLink]="['/companies', c.id]">{{ c.name }}</a>
-              @if (c.website) { <a class="site" [href]="'https://' + c.website" target="_blank" rel="noopener">↗</a> }
-            </td>
-            <td>{{ c.industry || '—' }}</td>
-            <td>
-              @if ((c.contactCount ?? 0) > 0) {
-                <a class="count-link" [routerLink]="['/contacts']" [queryParams]="{ companyId: c.id }">
-                  {{ c.contactCount }}
-                </a>
-                @if ((c.activeContacts ?? 0) > 0) {
-                  <span class="active-dot" [title]="c.activeContacts + ' active'">{{ c.activeContacts }} active</span>
-                }
-              } @else { <span class="dash">0</span> }
-            </td>
-            <td>{{ c.addressCity || '—' }}</td>
-            <td>{{ c.email || '—' }}</td>
-            <td>{{ c.phone || '—' }}</td>
-            <td class="row-actions">
-              <button class="link" (click)="openEdit(c)">Edit</button>
-              <button class="link danger" (click)="remove(c)">Delete</button>
-            </td>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th><th>Industry</th><th>Contacts</th>
+            <th>City</th><th>Email</th><th>Phone</th><th></th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (c of companies(); track c.id) {
+            <tr>
+              <td class="name-cell">
+                <a class="tbtn tbtn-accent" [routerLink]="['/companies', c.id]">{{ c.name }}</a>
+                @if (c.website) {
+                  <a class="site" [href]="'https://' + c.website" target="_blank"
+                     rel="noopener" title="Open website">↗</a>
+                }
+              </td>
+              <td>{{ c.industry || '—' }}</td>
+              <td class="count-cell">
+                @if ((c.contactCount ?? 0) > 0) {
+                  <a class="tbtn tbtn-accent" [routerLink]="['/contacts']"
+                     [queryParams]="{ companyId: c.id }">{{ c.contactCount }}</a>
+                  @if ((c.activeContacts ?? 0) > 0) {
+                    <span class="badge badge-Client">{{ c.activeContacts }} active</span>
+                  }
+                } @else { <span class="dim">0</span> }
+              </td>
+              <td>{{ c.addressCity || '—' }}</td>
+              <td>{{ c.email || '—' }}</td>
+              <td>{{ c.phone || '—' }}</td>
+              <td class="actions">
+                <button class="tbtn" (click)="openEdit(c)">Edit</button>
+                <button class="tbtn tbtn-danger" (click)="remove(c)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     <footer class="pager">
-      <span>{{ totalCount() }} companies · page {{ page() }} / {{ totalPages() }}</span>
+      <span>Page {{ page() }} of {{ totalPages() }}</span>
       <div class="pager-btns">
-        <button class="btn" [disabled]="page() === 1" (click)="prev()">Prev</button>
-        <button class="btn" [disabled]="page() >= totalPages()" (click)="next()">Next</button>
+        <button class="btn btn-sm" [disabled]="page() === 1" (click)="prev()">Previous</button>
+        <button class="btn btn-sm" [disabled]="page() >= totalPages()" (click)="next()">Next</button>
       </div>
     </footer>
   }

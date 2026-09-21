@@ -1,62 +1,68 @@
 <div class="page">
   <header class="page-head">
     <h1>Applications</h1>
-    <div class="tools">
-      <input type="search" placeholder="Search title…" [(ngModel)]="search" (keyup.enter)="load()" />
-      <select [(ngModel)]="stageFilter" (change)="load()">
+    <span class="muted">{{ totalCount() }}</span>
+    <div class="page-tools">
+      <input class="input search" type="search" placeholder="Search title…"
+             [(ngModel)]="search" (keyup.enter)="load()" />
+      <select class="select filter" [(ngModel)]="stageFilter" (change)="load()">
         @for (s of stages; track s.value) { <option [ngValue]="s.value">{{ s.label }}</option> }
       </select>
-      <input type="number" placeholder="Min amount" [(ngModel)]="minAmount" (keyup.enter)="load()" />
+      <input class="input amount-input" type="number" placeholder="Min amount"
+             [(ngModel)]="minAmount" (keyup.enter)="load()" />
       <button class="btn" (click)="load()">Apply</button>
-      <button class="btn primary" (click)="openCreate()">+ New application</button>
+      <button class="btn btn-primary" (click)="openCreate()">New application</button>
     </div>
   </header>
 
   @if (stageError()) {
-    <p class="stage-error">⚠ {{ stageError() }}</p>
+    <p class="note note-error stage-error">{{ stageError() }}</p>
   }
 
   @if (loading()) {
-    <p class="state">Loading…</p>
+    <p class="note">Loading…</p>
   } @else if (error()) {
-    <p class="state error">{{ error() }}</p>
+    <p class="note note-error">{{ error() }}</p>
   } @else if (items().length === 0) {
-    <div class="state">
-      <p>No applications yet.</p>
-      <button class="btn primary" (click)="openCreate()">+ Add your first application</button>
+    <div class="card empty">
+      <p>No applications yet</p>
+      <button class="btn btn-primary" style="margin-top:12px" (click)="openCreate()">
+        Add your first application
+      </button>
     </div>
   } @else {
-    <table class="grid">
-      <thead>
-        <tr><th>Title</th><th>Stage</th><th>Amount</th><th>Contact</th><th>Move to</th><th></th></tr>
-      </thead>
-      <tbody>
-        @for (a of items(); track a.id) {
-          <tr>
-            <td>{{ a.title }}</td>
-            <td><span class="pill" [class]="semanticClass(a)">{{ a.stage }}</span></td>
-            <td class="num">{{ a.amount | currency:a.currencyCode }}</td>
-            <td>{{ a.contactName || '—' }}</td>
-            <td>
-              <select class="stage-select" [ngModel]="a.stage"
-                      (ngModelChange)="moveStage(a, $event)"
-                      [disabled]="a.isClosed">
-                @for (s of stages; track s.value) {
-                  @if (s.name) {
-                    <option [value]="s.name">{{ s.label }}</option>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Title</th><th>Stage</th><th>Amount</th><th>Contact</th><th>Move to</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (a of items(); track a.id) {
+            <tr>
+              <td>{{ a.title }}</td>
+              <td><span [class]="'badge badge-' + semanticClass(a)">{{ a.stage }}</span></td>
+              <td class="num">{{ a.amount | currency:a.currencyCode }}</td>
+              <td>{{ a.contactName || '—' }}</td>
+              <td>
+                <select class="select stage-select" [ngModel]="a.stage"
+                        (ngModelChange)="moveStage(a, $event)"
+                        [disabled]="a.isClosed">
+                  @for (s of stages; track s.value) {
+                    @if (s.name) {
+                      <option [value]="s.name">{{ s.label }}</option>
+                    }
                   }
-                }
-              </select>
-            </td>
-            <td class="row-actions">
-              <button class="link" (click)="openEdit(a)">Edit</button>
-              <button class="link danger" (click)="remove(a)">Delete</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-    <p class="count">{{ totalCount() }} applications</p>
+                </select>
+              </td>
+              <td class="actions">
+                <button class="tbtn" (click)="openEdit(a)">Edit</button>
+                <button class="tbtn tbtn-danger" (click)="remove(a)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 
   <app-application-form

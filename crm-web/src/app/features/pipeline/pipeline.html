@@ -1,71 +1,57 @@
 <div class="page">
-  <!-- ---------- header ---------- -->
-  <header class="head">
+  <header class="page-head">
     <h1>Pipeline</h1>
-    <span class="count">{{ total() }} contacts</span>
-    <button class="ui-btn ui-btn--ghost" (click)="toggleImport()">
-      {{ importOpen() ? 'Close import' : 'Bulk import' }}
-    </button>
-    <button class="ui-btn ui-btn--ghost" (click)="load()">Refresh</button>
+    <span class="muted">{{ total() }} contacts</span>
+    <div class="page-tools">
+      <button class="btn btn-quiet" (click)="toggleImport()">
+        {{ importOpen() ? 'Close import' : 'Bulk import' }}
+      </button>
+      <button class="btn btn-quiet" (click)="load()">Refresh</button>
+    </div>
   </header>
 
-  <!-- ---------- quick add ---------- -->
+  <!-- quick add -->
   <section class="quick-add">
-    <input class="ui-input qa-name" type="text"
-           placeholder="Company or contact name"
-           [(ngModel)]="qaCompany" name="qaCompany"
-           [disabled]="qaBusy()"
+    <input class="input" type="text" placeholder="Company or contact name"
+           [(ngModel)]="qaCompany" name="qaCompany" [disabled]="qaBusy()"
            (keyup.enter)="quickAdd()" />
-    <input class="ui-input" type="email"
-           placeholder="Email"
-           [(ngModel)]="qaEmail" name="qaEmail"
-           [disabled]="qaBusy()"
+    <input class="input" type="email" placeholder="Email"
+           [(ngModel)]="qaEmail" name="qaEmail" [disabled]="qaBusy()"
            (keyup.enter)="quickAdd()" />
-    <input class="ui-input" type="text"
-           placeholder="Phone"
-           [(ngModel)]="qaPhone" name="qaPhone"
-           [disabled]="qaBusy()"
+    <input class="input" type="text" placeholder="Phone"
+           [(ngModel)]="qaPhone" name="qaPhone" [disabled]="qaBusy()"
            (keyup.enter)="quickAdd()" />
-    <select class="ui-select" [(ngModel)]="qaStatus" name="qaStatus" [disabled]="qaBusy()"
-            title="Which column this contact goes to">
+    <select class="select" [(ngModel)]="qaStatus" name="qaStatus" [disabled]="qaBusy()">
       @for (col of columns; track col.key) {
         <option [value]="col.status">{{ col.label }}</option>
       }
     </select>
-    <button class="ui-btn ui-btn--primary"
-            [disabled]="quickAddInvalid || qaBusy()"
-            (click)="quickAdd()">
-      {{ qaBusy() ? 'Adding…' : '+ Add Contact' }}
+    <button class="btn btn-primary" [disabled]="quickAddInvalid || qaBusy()" (click)="quickAdd()">
+      {{ qaBusy() ? 'Adding…' : 'Add contact' }}
     </button>
   </section>
 
+  <!-- bulk import -->
   @if (importOpen()) {
-    <section class="import-panel">
-      <label class="import-label" for="bulk">
-        Paste one contact per line — <code>Name | email | phone</code>
-      </label>
-      <textarea id="bulk" class="ui-input import-box" rows="5"
+    <section class="panel import">
+      <p class="import-hint">One contact per line — <code>Name | email | phone</code></p>
+
+      <textarea class="textarea import-box" rows="5"
                 placeholder="Nexus | info@nexus.com | 0791234567&#10;Omar Tech | omar@mail.com | 0787654321"
-                [(ngModel)]="importText" name="importText"
-                [disabled]="importBusy()"></textarea>
+                [(ngModel)]="importText" name="importText" [disabled]="importBusy()"></textarea>
 
       <div class="import-foot">
-        <label class="import-status">
-          Add to
-          <select class="ui-select" [(ngModel)]="importStatus" name="importStatus"
-                  [disabled]="importBusy()">
-            @for (col of columns; track col.key) {
-              <option [value]="col.status">{{ col.label }}</option>
-            }
-          </select>
-        </label>
-        <span class="import-count">
-          {{ parsedRows.length }} contact{{ parsedRows.length === 1 ? '' : 's' }} detected
-        </span>
-        <button class="ui-btn" (click)="toggleImport()">Cancel</button>
-        <button class="ui-btn ui-btn--primary"
-                [disabled]="parsedRows.length === 0 || importBusy()"
-                (click)="runImport()">
+        <select class="select" style="width:auto"
+                [(ngModel)]="importStatus" name="importStatus" [disabled]="importBusy()">
+          @for (col of columns; track col.key) {
+            <option [value]="col.status">Add to {{ col.label }}</option>
+          }
+        </select>
+        <span class="muted">{{ parsedRows.length }} detected</span>
+        <span class="spacer"></span>
+        <button class="btn btn-sm" (click)="toggleImport()">Cancel</button>
+        <button class="btn btn-sm btn-primary"
+                [disabled]="parsedRows.length === 0 || importBusy()" (click)="runImport()">
           {{ importBusy() ? 'Importing…' : 'Import' }}
         </button>
       </div>
@@ -79,17 +65,17 @@
   }
 
   @if (loading()) {
-    <p class="state">Loading board…</p>
+    <p class="note">Loading…</p>
   } @else if (error()) {
-    <p class="state state--error">{{ error() }}</p>
+    <p class="note note-error">{{ error() }}</p>
   } @else {
     <div class="board" cdkDropListGroup>
       @for (col of columns; track col.key) {
-        <section class="col" [style.--col-color]="col.color">
-
+        <section class="col" [style.--lane]="col.color">
           <header class="col-head">
-            <span class="col-label">{{ col.label }}</span>
-            <span class="col-count">{{ contactsIn(col.key).length }}</span>
+            <span [class]="'dot dot-' + col.status"></span>
+            <span class="col-name">{{ col.label }}</span>
+            <span class="col-n">{{ contactsIn(col.key).length }}</span>
           </header>
 
           <div class="col-body"
@@ -100,48 +86,44 @@
                (cdkDropListDropped)="drop($event, col)">
 
             @for (c of contactsIn(col.key); track c.id) {
-              <article class="card" [class.card--overdue]="isOverdue(c)" cdkDrag>
-                <div class="drag-placeholder" *cdkDragPlaceholder></div>
+              <article class="card-item"
+                       [class.overdue]="isOverdue(c)"
+                       [style.--rail]="col.color"
+                       cdkDrag>
+                <div class="ghost" *cdkDragPlaceholder></div>
 
                 <div class="card-top">
-                  <span class="avatar" [style.background]="avatarColor(c)">{{ initial(c) }}</span>
+                  <span [class]="'avatar avatar-' + c.status">{{ initial(c) }}</span>
                   <a class="card-name" [routerLink]="['/contacts', c.id]">{{ c.fullName }}</a>
                 </div>
 
-                @if (c.companyName) { <p class="card-company">{{ c.companyName }}</p> }
-                @if (c.phone) { <p class="card-phone">{{ c.phone }}</p> }
+                @if (c.companyName) { <p class="card-sub">{{ c.companyName }}</p> }
+                @if (c.phone) { <p class="card-sub">{{ c.phone }}</p> }
 
                 @if (c.nextAction) {
-                  <div class="card-na" [class.card-na--overdue]="isOverdue(c)">
-                    <span class="na-text">{{ c.nextAction }}</span>
-                    @if (c.nextActionDate) {
-                      <span class="na-when">{{ dueLabel(c) }}</span>
-                    }
+                  <div class="card-next" [class.late]="isOverdue(c)">
+                    <span class="next-text">{{ c.nextAction }}</span>
+                    @if (c.nextActionDate) { <span class="next-when">{{ dueLabel(c) }}</span> }
                   </div>
                 }
 
                 @if (noteFor() === c.id) {
-                  <div class="note-row">
-                    <input class="ui-input note-input" type="text"
-                           placeholder="Note, then Enter…"
-                           [(ngModel)]="noteText" name="note"
-                           [disabled]="noteBusy()"
-                           (keyup.enter)="saveNote(c)"
-                           (keyup.escape)="cancelNote()" />
-                    <button class="qa-btn" type="button" (click)="cancelNote()">✕</button>
+                  <div class="card-acts">
+                    <input class="input note-input" type="text" placeholder="Note, then Enter…"
+                           [(ngModel)]="noteText" name="note" [disabled]="noteBusy()"
+                           (keyup.enter)="saveNote(c)" (keyup.escape)="cancelNote()" />
+                    <button class="tbtn" type="button" (click)="cancelNote()">✕</button>
                   </div>
                 } @else {
-                  <div class="qa-row">
-                    <button class="qa-btn" type="button" title="Add note" (click)="startNote(c)">Note</button>
-                    <button class="qa-btn" type="button" title="Send WhatsApp"
-                            (click)="openMessage(c, 'whatsapp')">WhatsApp</button>
-                    <button class="qa-btn" type="button" title="Send email"
-                            (click)="openMessage(c, 'email')">Email</button>
+                  <div class="card-acts">
+                    <button class="tbtn" type="button" (click)="startNote(c)">Note</button>
+                    <button class="tbtn" type="button" (click)="openMessage(c, 'whatsapp')">WhatsApp</button>
+                    <button class="tbtn" type="button" (click)="openMessage(c, 'email')">Email</button>
                   </div>
                 }
               </article>
             } @empty {
-              <p class="col-empty">No contacts yet</p>
+              <p class="col-empty">No contacts</p>
             }
           </div>
         </section>
@@ -157,5 +139,5 @@
     (submitted)="handleAction($event)"
     (closed)="closeAction()" />
 
-  @if (toast()) { <div class="ui-toast">{{ toast() }}</div> }
+  @if (toast()) { <div class="toast">{{ toast() }}</div> }
 </div>

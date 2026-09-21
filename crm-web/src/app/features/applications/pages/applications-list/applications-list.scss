@@ -1,38 +1,13 @@
-.page { padding: 24px; }
-.page-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
-h1 { margin: 0; font-size: 24px; }
-.tools { display: flex; gap: 8px; flex-wrap: wrap; }
-.tools input, .tools select { padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 6px; }
-.tools input[type="number"] { width: 120px; }
-.btn { padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 6px; background: #fff; cursor: pointer; }
-.btn:hover { background: var(--bg-hover); }
+.search { min-width: 230px; width: auto; }
+.filter { width: auto; }
+.amount-input { width: 120px; }
 
-.grid { width: 100%; border-collapse: collapse; }
-.grid th, .grid td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-.grid th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
-.num { text-align: right; font-variant-numeric: tabular-nums; }
-
-.pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
-.pill.process { background: var(--accent-soft); color: var(--accent); }
-.pill.success { background: #ecfdf5; color: var(--success); }
-.pill.failure { background: var(--danger-soft); color: var(--danger); }
-
-.count { margin-top: 14px; color: var(--text-muted); font-size: 13px; }
-.state { padding: 32px 0; color: var(--text-muted); }
-.state.error { color: var(--danger); }
-
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-.btn.primary:hover { background: var(--accent-hover); }
-.row-actions { display: flex; gap: 10px; justify-content: flex-end; }
-.link { background: none; border: 0; cursor: pointer; color: var(--accent); font: inherit; font-size: 13px; }
-.link.danger { color: var(--danger); }
 .stage-select {
-  padding: 5px 8px; border: 1px solid var(--border-strong); border-radius: 6px;
-  font: inherit; font-size: 12.5px; background: #fff; cursor: pointer;
+  width: auto; min-width: 130px;
+  height: 28px; padding: 0 26px 0 8px;
+  font-size: 12px;
+  background-position: right 8px center;
 }
-.stage-select:disabled { opacity: .5; cursor: not-allowed; }
-.stage-error {
-  background: var(--danger-soft); color: var(--danger); border: 1px solid var(--danger-soft);
-  border-radius: 8px; padding: 10px 14px; margin: 0 0 16px; font-size: 13.5px;
-}
-.state { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+
+.stage-error { margin-bottom: var(--s-4); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }

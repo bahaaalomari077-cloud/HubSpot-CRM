@@ -1,25 +1,25 @@
 @if (mode()) {
-  <div class="backdrop" (click)="close()">
+  <div class="overlay" (click)="close()">
     <div class="modal" (click)="$event.stopPropagation()" role="dialog">
       <header class="modal-head">
         <h3>{{ isEdit ? 'Edit application' : 'New application' }}</h3>
-        <button class="x" type="button" (click)="close()" aria-label="Close">×</button>
+        <button class="modal-x" type="button" (click)="close()" aria-label="Close">×</button>
       </header>
 
       <div class="modal-body">
         <label>
-          <span>Title *</span>
-          <input type="text" [(ngModel)]="title" name="title" (keyup.enter)="submit()" />
+          <span class="label">Title *</span>
+          <input class="input" type="text" [(ngModel)]="title" name="title" (keyup.enter)="submit()" />
         </label>
 
-        <div class="row">
+        <div class="field-row">
           <label>
-            <span>Amount</span>
-            <input type="number" min="0" step="100" [(ngModel)]="amount" name="amount" />
+            <span class="label">Amount</span>
+            <input class="input" type="number" min="0" step="100" [(ngModel)]="amount" name="amount" />
           </label>
           <label>
-            <span>Currency</span>
-            <select [(ngModel)]="currencyCode" name="currency">
+            <span class="label">Currency</span>
+            <select class="select" [(ngModel)]="currencyCode" name="currency">
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
               <option value="JOD">JOD</option>
@@ -27,14 +27,14 @@
           </label>
         </div>
 
-        <div class="row">
+        <div class="field-row">
           <label>
-            <span>Probability (%)</span>
-            <input type="number" min="0" max="100" step="5" [(ngModel)]="probability" name="prob" />
+            <span class="label">Probability (%)</span>
+            <input class="input" type="number" min="0" max="100" step="5" [(ngModel)]="probability" name="prob" />
           </label>
           <label>
-            <span>Contact</span>
-            <select [(ngModel)]="contactId" name="contactId">
+            <span class="label">Contact</span>
+            <select class="select" [(ngModel)]="contactId" name="contactId">
               <option value="">— none —</option>
               @for (c of contacts(); track c.id) {
                 <option [value]="c.id">{{ c.fullName }}</option>
@@ -43,12 +43,12 @@
           </label>
         </div>
 
-        @if (error()) { <p class="err">{{ error() }}</p> }
+        @if (error()) { <p class="note note-error">{{ error() }}</p> }
       </div>
 
       <footer class="modal-foot">
         <button class="btn" type="button" (click)="close()">Cancel</button>
-        <button class="btn primary" type="button"
+        <button class="btn btn-primary" type="button"
                 [disabled]="invalid || busy()" (click)="submit()">
           {{ busy() ? 'Saving…' : (isEdit ? 'Save changes' : 'Create') }}
         </button>

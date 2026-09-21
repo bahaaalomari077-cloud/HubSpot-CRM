@@ -6,6 +6,7 @@ import { TimelineService } from '../../../activities/services/timeline.service';
 import { ActivityService, ACTIVITY_TYPE } from '../../../activities/services/activity.service';
 import { MessageService, CHANNEL } from '../../../messages/services/message.service';
 import { Timeline } from '../../../activities/components/timeline';
+import { ContactForm, ContactFormValue } from '../../components/contact-form/contact-form';
 import {
   QuickActionModal, QuickActionKind, QuickActionPayload
 } from '../../../../shared/components/quick-action/quick-action-modal';
@@ -15,7 +16,7 @@ import { CONTACT_STATUSES, ContactStatus } from '../../../../core/models/common.
 
 @Component({
   selector: 'app-contact-details',
-  imports: [RouterLink, FormsModule, Timeline, QuickActionModal],
+  imports: [RouterLink, FormsModule, Timeline, QuickActionModal, ContactForm],
   templateUrl: './contact-details.html',
   styleUrl: './contact-details.scss'
 })
@@ -40,6 +41,11 @@ export class ContactDetails implements OnInit {
   readonly openAction = signal<QuickActionKind | null>(null);
   readonly actionBusy = signal(false);
   readonly actionError = signal<string | null>(null);
+
+  // ---- edit contact form ----
+  readonly formMode = signal<Contact | 'new' | null>(null);
+  readonly formBusy = signal(false);
+  readonly formError = signal<string | null>(null);
 
   // ---- inline quick-note ----
   noteText = '';
@@ -66,6 +72,12 @@ export class ContactDetails implements OnInit {
     this.loadTimeline();
   }
 
+  /** Called when the timeline edits or deletes an item. */
+  reloadTimeline(): void {
+    this.loadTimeline();
+    this.flash('Timeline updated');
+  }
+
   private loadTimeline(): void {
     this.timeline.forContact(this.contactId).subscribe({
       next: (g) => this.groups.set(g),
@@ -87,6 +99,40 @@ export class ContactDetails implements OnInit {
       error: () => {
         this.contact.set({ ...current, status: previous });
         this.flash('Could not update status');
+      }
+    });
+  }
+
+  // ---- edit the contact's details (name, email, phone, company) ----
+  openEdit(): void {
+    const c = this.contact();
+    if (!c) return;
+    this.formError.set(null);
+    this.formMode.set(c);
+  }
+
+  closeForm(): void {
+    this.formMode.set(null);
+    this.formBusy.set(false);
+    this.formError.set(null);
+  }
+
+  saveForm(v: ContactFormValue): void {
+    const current = this.contact();
+    if (!current) return;
+
+    this.formBusy.set(true);
+    this.formError.set(null);
+
+    this.contacts.update(current.id, v).subscribe({
+      next: (updated) => {
+        this.contact.set(updated);
+        this.closeForm();
+        this.flash('Contact updated');
+      },
+      error: () => {
+        this.formBusy.set(false);
+        this.formError.set('Could not save. Check the email and phone format.');
       }
     });
   }

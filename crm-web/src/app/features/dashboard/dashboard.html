@@ -1,10 +1,10 @@
 <div class="page">
-  <h1>Dashboard</h1>
+  <header class="page-head"><h1>Dashboard</h1></header>
 
   @if (loading()) {
-    <p class="state">Loading…</p>
+    <p class="note">Loading…</p>
   } @else if (error()) {
-    <p class="state error">{{ error() }}</p>
+    <p class="note note-error">{{ error() }}</p>
   } @else if (data(); as d) {
 
     <!-- ---------- contacts grouped by status ---------- -->
@@ -12,10 +12,10 @@
       <h2>Pipeline <span class="sub">{{ d.totalContacts }} contacts</span></h2>
       <div class="status-row">
         @for (g of d.contactsByStatus; track g.status) {
-          <a class="status-card"
+          <a class="card card-pad status-card"
              [routerLink]="['/contacts']"
-             [queryParams]="{ status: statusIndex(g.status) }"
-             [style.--sc-color]="statusColor(g.status)">
+             [queryParams]="{ status: statusIndex(g.status) }">
+            <span [class]="'dot dot-' + g.status"></span>
             <span class="sc-count">{{ g.count }}</span>
             <span class="sc-label">{{ g.status }}</span>
           </a>
@@ -25,26 +25,26 @@
 
     <div class="cols">
       <!-- ---------- upcoming actions ---------- -->
-      <section class="block card">
+      <section class="card card-pad">
         <h2>
           What's next
           @if (d.overdueCount > 0) {
-            <span class="badge-overdue">{{ d.overdueCount }} overdue</span>
+            <span class="badge badge-danger">{{ d.overdueCount }} overdue</span>
           }
         </h2>
 
         @if (d.upcomingActions.length === 0) {
-          <p class="empty">No next actions set. Open a contact to add one.</p>
+          <p class="dim-note">No next actions set. Open a contact to add one.</p>
         } @else {
           <ul class="actions">
             @for (a of d.upcomingActions; track a.contactId) {
-              <li class="action" [class.overdue]="a.isOverdue">
-                <span class="dot" [style.background]="statusColor(a.status)"></span>
+              <li class="action">
+                <span [class]="'dot dot-' + a.status"></span>
                 <div class="a-body">
                   <a class="a-name" [routerLink]="['/contacts', a.contactId]">{{ a.contactName }}</a>
                   <p class="a-text">{{ a.nextAction }}</p>
                 </div>
-                <span class="a-due" [class.overdue]="a.isOverdue">{{ dueLabel(a) }}</span>
+                <span [class]="a.isOverdue ? 'badge badge-danger' : 'badge'">{{ dueLabel(a) }}</span>
               </li>
             }
           </ul>
@@ -52,11 +52,11 @@
       </section>
 
       <!-- ---------- recent activity ---------- -->
-      <section class="block card">
+      <section class="card card-pad">
         <h2>Recent activity</h2>
 
         @if (d.recentItems.length === 0) {
-          <p class="empty">Nothing logged yet.</p>
+          <p class="dim-note">Nothing logged yet.</p>
         } @else {
           <ul class="recent">
             @for (r of d.recentItems; track r.id) {

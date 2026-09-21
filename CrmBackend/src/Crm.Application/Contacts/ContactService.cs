@@ -62,10 +62,30 @@ public class ContactService : IContactService
 
         var total = await q.CountAsync(ct);
 
+        // The related names are projected in the same query — the list shows a
+        // contact's company, and a second round-trip per row would be wasteful.
         var items = await q
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(c => Map(c))
+            .Select(c => new ContactDto
+            {
+                Id = c.Id,
+                FirstName = c.FirstName,
+                LastName = c.LastName,
+                // Trimmed so a blank last name (company-only cards) leaves no trailing space.
+                FullName = (c.FirstName + " " + c.LastName).Trim(),
+                Email = c.Email,
+                Phone = c.Phone,
+                Position = c.Position,
+                Status = c.Status,
+                NextAction = c.NextAction,
+                NextActionDate = c.NextActionDate,
+                CompanyId = c.CompanyId,
+                CompanyName = c.Company != null ? c.Company.Name : null,
+                AssignedToId = c.AssignedToId,
+                AssignedToName = c.AssignedTo != null ? c.AssignedTo.FullName : null,
+                CreatedAt = c.CreatedAt
+            })
             .ToListAsync(ct);
 
         return new PagedResult<ContactDto>(items, query.Page, query.PageSize, total);
@@ -103,7 +123,15 @@ public class ContactService : IContactService
         _log.LogInformation("Contact created {ContactId} '{FullName}' status={Status}",
             contact.Id, contact.FullName, contact.Status);
 
-        return Map(contact);
+        // Re-read with relations so the response carries CompanyName — the client
+        // shows the new contact straight from this payload.
+        var saved = await _db.Contacts
+            .Include(c => c.Company)
+            .Include(c => c.AssignedTo)
+            .AsNoTracking()
+            .FirstAsync(c => c.Id == contact.Id, ct);
+
+        return MapWithRelations(saved);
     }
 
     public async Task<ContactDto?> UpdateAsync(Guid id, UpdateContactDto dto, CancellationToken ct = default)
@@ -124,13 +152,27 @@ public class ContactService : IContactService
         contact.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync(ct);
-        return Map(contact);
+
+        // The company may have just changed, so the contact is re-read with its
+        // relations — otherwise the response carries a stale name, or none at all.
+        var saved = await _db.Contacts
+            .Include(c => c.Company)
+            .Include(c => c.AssignedTo)
+            .AsNoTracking()
+            .FirstAsync(c => c.Id == id, ct);
+
+        return MapWithRelations(saved);
     }
 
     /// <summary>Manual status change. No rules — any status can move to any other.</summary>
     public async Task<ContactDto?> UpdateStatusAsync(Guid id, UpdateContactStatusDto dto, CancellationToken ct = default)
     {
-        var contact = await _db.Contacts.FirstOrDefaultAsync(c => c.Id == id, ct);
+        // Relations are included so the returned DTO keeps CompanyName/AssignedToName —
+        // the client replaces its whole contact object with this response.
+        var contact = await _db.Contacts
+            .Include(c => c.Company)
+            .Include(c => c.AssignedTo)
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
         if (contact is null) return null;
 
         var previous = contact.Status;
@@ -142,7 +184,7 @@ public class ContactService : IContactService
         _log.LogInformation("Contact {ContactId} status {From} -> {To}",
             contact.Id, previous, contact.Status);
 
-        return Map(contact);
+        return MapWithRelations(contact);
     }
 
     /// <summary>
@@ -263,7 +305,10 @@ public class ContactService : IContactService
     /// <summary>Set or clear what to do next with this contact.</summary>
     public async Task<ContactDto?> UpdateNextActionAsync(Guid id, UpdateNextActionDto dto, CancellationToken ct = default)
     {
-        var contact = await _db.Contacts.FirstOrDefaultAsync(c => c.Id == id, ct);
+        var contact = await _db.Contacts
+            .Include(c => c.Company)
+            .Include(c => c.AssignedTo)
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
         if (contact is null) return null;
 
         contact.NextAction = string.IsNullOrWhiteSpace(dto.NextAction) ? null : dto.NextAction.Trim();
@@ -275,7 +320,7 @@ public class ContactService : IContactService
         _log.LogInformation("Contact {ContactId} next action set to '{NextAction}' due {Due}",
             contact.Id, contact.NextAction ?? "(none)", contact.NextActionDate);
 
-        return Map(contact);
+        return MapWithRelations(contact);
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)

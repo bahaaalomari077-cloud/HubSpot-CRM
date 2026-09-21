@@ -54,8 +54,31 @@
                   }
                   @if (item.isCompleted) { <span class="tl-done">✓ Done</span> }
                 </div>
-                @if (item.detail) { <p class="tl-detail">{{ item.detail }}</p> }
-                <time class="tl-time">{{ item.occurredAt | date:'shortTime' }}</time>
+                @if (editingId() === item.id) {
+                  <div class="tl-edit">
+                    <input class="tl-edit-input" type="text"
+                           [(ngModel)]="editText" name="editText"
+                           [disabled]="busy()"
+                           (keyup.enter)="saveEdit(item)"
+                           (keyup.escape)="cancelEdit()" />
+                    <button class="tl-act" type="button" (click)="saveEdit(item)"
+                            [disabled]="busy()">Save</button>
+                    <button class="tl-act" type="button" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                } @else {
+                  @if (item.detail) { <p class="tl-detail">{{ item.detail }}</p> }
+                }
+
+                <div class="tl-foot">
+                  <time class="tl-time">{{ item.occurredAt | date:'shortTime' }}</time>
+                  @if (canEdit(item) && editingId() !== item.id) {
+                    <span class="tl-actions">
+                      <button class="tl-act" type="button" (click)="startEdit(item)">Edit</button>
+                      <button class="tl-act tl-act--danger" type="button"
+                              (click)="removeItem(item)">Delete</button>
+                    </span>
+                  }
+                </div>
               </div>
             </li>
           }

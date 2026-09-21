@@ -2,17 +2,17 @@
   <a class="back" routerLink="/companies">← Back to companies</a>
 
   @if (loading()) {
-    <p class="state">Loading…</p>
+    <p class="note">Loading…</p>
   } @else if (error()) {
-    <p class="state error">{{ error() }}</p>
+    <p class="note note-error">{{ error() }}</p>
   } @else if (data(); as d) {
 
     <!-- ---------- header ---------- -->
-    <header class="head" [class.active]="d.isActive">
+    <header class="card card-pad head">
       <div class="head-main">
         <h1>
           {{ d.company.name }}
-          @if (d.isActive) { <span class="active-badge">Active</span> }
+          @if (d.isActive) { <span class="badge badge-Client">Active</span> }
         </h1>
         <p class="meta">
           @if (d.company.industry) { <span>{{ d.company.industry }}</span> }
@@ -31,23 +31,21 @@
 
     <!-- ---------- insights ---------- -->
     <section class="insights">
-      <div class="tile">
+      <div class="card card-pad tile">
         <span class="t-count">{{ d.company.contactCount ?? 0 }}</span>
         <span class="t-label">Total contacts</span>
       </div>
-      <div class="tile" [class.hot]="d.activeContacts > 0">
+      <div class="card card-pad tile" [class.hot]="d.activeContacts > 0">
         <span class="t-count">{{ d.activeContacts }}</span>
         <span class="t-label">Active</span>
       </div>
 
       @if (d.contactsByStatus.length > 0) {
-        <div class="breakdown">
-          <span class="b-label">By status</span>
+        <div class="card card-pad breakdown">
+          <span class="t-label">By status</span>
           <div class="bars">
             @for (g of d.contactsByStatus; track g.status) {
-              <span class="bar" [style.background]="statusColor(g.status)">
-                {{ g.status }} {{ g.count }}
-              </span>
+              <span [class]="'badge badge-' + g.status">{{ g.status }} · {{ g.count }}</span>
             }
           </div>
         </div>
@@ -59,32 +57,35 @@
       <h2>Contacts</h2>
 
       @if (d.contacts.length === 0) {
-        <p class="empty">No contacts linked to this company yet.</p>
+        <div class="card empty"><p>No contacts linked to this company yet</p></div>
       } @else {
-        <table class="grid">
-          <thead>
-            <tr><th>Name</th><th>Status</th><th>Position</th><th>Next action</th><th>Email</th><th>Phone</th></tr>
-          </thead>
-          <tbody>
-            @for (c of d.contacts; track c.id) {
-              <tr [class]="'row-' + c.status.toLowerCase()">
-                <td><a [routerLink]="['/contacts', c.id]">{{ c.fullName }}</a></td>
-                <td><span class="pill" [class]="'pill ' + c.status.toLowerCase()">{{ c.status }}</span></td>
-                <td>{{ c.position || '—' }}</td>
-                <td class="na-cell">
-                  @if (c.nextAction) {
-                    <span class="na-txt">{{ c.nextAction }}</span>
-                    @if (c.nextActionDate) {
-                      <span class="na-tag" [class.overdue]="isOverdue(c)">{{ dueLabel(c) }}</span>
-                    }
-                  } @else { <span class="dash">—</span> }
-                </td>
-                <td>{{ c.email || '—' }}</td>
-                <td>{{ c.phone || '—' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Name</th><th>Status</th><th>Position</th><th>Next action</th><th>Email</th><th>Phone</th></tr>
+            </thead>
+            <tbody>
+              @for (c of d.contacts; track c.id) {
+                <tr [attr.data-status]="c.status">
+                  <td><a class="tbtn tbtn-accent" [routerLink]="['/contacts', c.id]">{{ c.fullName }}</a></td>
+                  <td><span [class]="'badge badge-' + c.status">{{ c.status }}</span></td>
+                  <td>{{ c.position || '—' }}</td>
+                  <td class="next-cell">
+                    @if (c.nextAction) {
+                      <span class="next-text">{{ c.nextAction }}</span>
+                      @if (c.nextActionDate) {
+                        <span [class]="isOverdue(c) ? 'badge badge-danger' : 'badge'"
+                              style="margin-left:8px">{{ dueLabel(c) }}</span>
+                      }
+                    } @else { <span class="dim">—</span> }
+                  </td>
+                  <td>{{ c.email || '—' }}</td>
+                  <td>{{ c.phone || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </section>
   }

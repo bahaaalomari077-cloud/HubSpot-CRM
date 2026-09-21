@@ -1,67 +1,67 @@
 @if (mode()) {
-  <div class="backdrop" (click)="close()">
+  <div class="overlay" (click)="close()">
     <div class="modal" (click)="$event.stopPropagation()" role="dialog">
       <header class="modal-head">
         <h3>{{ isEdit ? 'Edit company' : 'New company' }}</h3>
-        <button class="x" type="button" (click)="close()" aria-label="Close">×</button>
+        <button class="modal-x" type="button" (click)="close()" aria-label="Close">×</button>
       </header>
 
       <div class="modal-body">
         <label>
-          <span>Company name *</span>
-          <input type="text" [(ngModel)]="name" name="name" (keyup.enter)="submit()" />
+          <span class="label">Company name *</span>
+          <input class="input" type="text" [(ngModel)]="name" name="name" (keyup.enter)="submit()" />
         </label>
 
-        <div class="row">
+        <div class="field-row">
           <label>
-            <span>Industry</span>
-            <input type="text" [(ngModel)]="industry" name="industry" placeholder="Software" />
+            <span class="label">Industry</span>
+            <input class="input" type="text" [(ngModel)]="industry" name="industry" placeholder="Software" />
           </label>
           <label>
-            <span>Website</span>
-            <input type="text" [(ngModel)]="website" name="website" placeholder="example.com" />
-          </label>
-        </div>
-
-        <div class="row">
-          <label>
-            <span>Email</span>
-            <input type="email" [(ngModel)]="email" name="email" />
-          </label>
-          <label>
-            <span>Phone</span>
-            <input type="text" [(ngModel)]="phone" name="phone" placeholder="962791234567" />
+            <span class="label">Website</span>
+            <input class="input" type="text" [(ngModel)]="website" name="website" placeholder="example.com" />
           </label>
         </div>
 
-        <div class="row">
+        <div class="field-row">
           <label>
-            <span>City</span>
-            <input type="text" [(ngModel)]="addressCity" name="city" />
+            <span class="label">Email</span>
+            <input class="input" type="email" [(ngModel)]="email" name="email" />
           </label>
           <label>
-            <span>Country</span>
-            <input type="text" [(ngModel)]="addressCountry" name="country" />
-          </label>
-        </div>
-
-        <div class="row">
-          <label>
-            <span>Employees</span>
-            <input type="number" min="0" [(ngModel)]="employeeCount" name="employees" />
-          </label>
-          <label>
-            <span>Annual revenue</span>
-            <input type="number" min="0" step="1000" [(ngModel)]="annualRevenue" name="revenue" />
+            <span class="label">Phone</span>
+            <input class="input" type="text" [(ngModel)]="phone" name="phone" placeholder="962791234567" />
           </label>
         </div>
 
-        @if (error()) { <p class="err">{{ error() }}</p> }
+        <div class="field-row">
+          <label>
+            <span class="label">City</span>
+            <input class="input" type="text" [(ngModel)]="addressCity" name="city" />
+          </label>
+          <label>
+            <span class="label">Country</span>
+            <input class="input" type="text" [(ngModel)]="addressCountry" name="country" />
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label>
+            <span class="label">Employees</span>
+            <input class="input" type="number" min="0" [(ngModel)]="employeeCount" name="employees" />
+          </label>
+          <label>
+            <span class="label">Annual revenue</span>
+            <input class="input" type="number" min="0" step="1000" [(ngModel)]="annualRevenue" name="revenue" />
+          </label>
+        </div>
+
+        @if (error()) { <p class="note note-error">{{ error() }}</p> }
       </div>
 
       <footer class="modal-foot">
         <button class="btn" type="button" (click)="close()">Cancel</button>
-        <button class="btn primary" type="button"
+        <button class="btn btn-primary" type="button"
                 [disabled]="invalid || busy()" (click)="submit()">
           {{ busy() ? 'Saving…' : (isEdit ? 'Save changes' : 'Create company') }}
         </button>

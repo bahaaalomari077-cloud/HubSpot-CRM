@@ -2,24 +2,25 @@
   <a class="back" routerLink="/contacts">← Back to contacts</a>
 
   @if (loading()) {
-    <p class="state">Loading…</p>
+    <p class="note">Loading…</p>
   } @else if (error()) {
-    <p class="state error">{{ error() }}</p>
+    <p class="note note-error">{{ error() }}</p>
   } @else if (contact(); as c) {
     <div class="layout">
       <!-- ---------- left: profile ---------- -->
-      <aside class="card profile">
-        <div class="avatar" [style.background]="statusColor(c.status)">
-          {{ c.firstName.charAt(0) }}{{ c.lastName.charAt(0) }}
+      <aside class="card card-pad profile">
+        <div class="profile-top">
+          <span [class]="'avatar avatar-lg avatar-' + c.status">
+            {{ c.firstName.charAt(0) }}{{ c.lastName.charAt(0) }}
+          </span>
+          <button class="tbtn tbtn-accent" type="button" (click)="openEdit()">Edit</button>
         </div>
         <h1>{{ c.fullName }}</h1>
-        @if (c.position) { <p class="muted">{{ c.position }}</p> }
+        @if (c.position) { <p class="sub">{{ c.position }}</p> }
 
-        <label class="status-field">
-          <span>Status</span>
-          <select [ngModel]="c.status"
-                  (ngModelChange)="onStatusChange($event)"
-                  [style.borderColor]="statusColor(c.status)">
+        <label class="block">
+          <span class="label">Status</span>
+          <select class="select" [ngModel]="c.status" (ngModelChange)="onStatusChange($event)">
             @for (s of statuses; track s.value) {
               <option [value]="s.value">{{ s.label }}</option>
             }
@@ -29,78 +30,77 @@
         <!-- ---------- next action ---------- -->
         <div class="next-action">
           <div class="na-head">
-            <span>Next action</span>
+            <span class="label">Next action</span>
             @if (!editingNextAction()) {
-              <button class="na-edit" type="button" (click)="startEditNextAction()">
+              <button class="tbtn tbtn-accent" type="button" (click)="startEditNextAction()">
                 {{ c.nextAction ? 'Edit' : 'Add' }}
               </button>
             }
           </div>
 
           @if (editingNextAction()) {
-            <input class="na-input" type="text" placeholder="e.g. Send the revised quote"
+            <input class="input" type="text" placeholder="e.g. Send the revised quote"
                    [(ngModel)]="nextActionText" name="naText"
                    (keyup.enter)="saveNextAction()" />
-            <input class="na-input" type="date"
+            <input class="input" type="date"
                    [(ngModel)]="nextActionDate" name="naDate" />
             <div class="na-btns">
-              <button class="btn sm" type="button" (click)="cancelNextAction()">Cancel</button>
-              <button class="btn sm primary" type="button"
+              <button class="btn btn-sm" type="button" (click)="cancelNextAction()">Cancel</button>
+              <button class="btn btn-sm btn-primary" type="button"
                       [disabled]="nextActionBusy()" (click)="saveNextAction()">Save</button>
             </div>
           } @else if (c.nextAction) {
             <p class="na-text">{{ c.nextAction }}</p>
             @if (c.nextActionDate) {
-              <span class="na-due" [class.overdue]="(nextActionDays() ?? 0) < 0">
+              <span [class]="(nextActionDays() ?? 0) < 0 ? 'badge badge-danger' : 'badge'">
                 {{ nextActionLabel() }}
               </span>
             }
           } @else {
-            <p class="na-empty">Nothing planned.</p>
+            <p class="na-empty">Nothing planned</p>
           }
         </div>
 
-        <dl>
+        <dl class="facts">
           <dt>Email</dt><dd>{{ c.email || '—' }}</dd>
           <dt>Phone</dt><dd>{{ c.phone || '—' }}</dd>
           <dt>Company</dt><dd>{{ c.companyName || '—' }}</dd>
         </dl>
 
-        <!-- quick actions (note is now inline, so only 3 here) -->
-        <div class="actions">
-          <button class="qa" type="button" (click)="open('call')">
-            Log Call
-          </button>
-          <button class="qa" type="button" (click)="open('email')">
-            Send Email
-          </button>
-          <button class="qa" type="button" (click)="open('whatsapp')">
-            Send WhatsApp
-          </button>
+        <div class="quick-actions">
+          <button class="btn btn-sm" type="button" (click)="open('call')">Log call</button>
+          <button class="btn btn-sm" type="button" (click)="open('email')">Email</button>
+          <button class="btn btn-sm" type="button" (click)="open('whatsapp')">WhatsApp</button>
         </div>
       </aside>
 
       <!-- ---------- right: quick note + timeline ---------- -->
-      <section class="card">
+      <section class="card card-pad">
         <h2>Timeline</h2>
 
-        <!-- inline quick note: press Enter to save -->
         <div class="quick-note">
-            <input class="qn-input" type="text"
+          <input class="input" type="text"
                  placeholder="Add a note and press Enter…"
                  [(ngModel)]="noteText" name="noteText"
                  [disabled]="noteBusy()"
                  (keyup.enter)="saveNote()" />
-          <button class="btn sm primary" type="button"
+          <button class="btn btn-primary" type="button"
                   [disabled]="!noteText.trim() || noteBusy()" (click)="saveNote()">
             {{ noteBusy() ? '…' : 'Add' }}
           </button>
         </div>
 
-        <app-timeline [groups]="groups()" />
+        <app-timeline [groups]="groups()" (changed)="reloadTimeline()" />
       </section>
     </div>
   }
+
+  <app-contact-form
+    [mode]="formMode()"
+    [busy]="formBusy()"
+    [error]="formError()"
+    (saved)="saveForm($event)"
+    (closed)="closeForm()" />
 
   <app-quick-action-modal
     [kind]="openAction()"
@@ -110,7 +110,5 @@
     (submitted)="handleAction($event)"
     (closed)="closeAction()" />
 
-  @if (toast()) {
-    <div class="toast">{{ toast() }}</div>
-  }
+  @if (toast()) { <div class="toast">{{ toast() }}</div> }
 </div>
